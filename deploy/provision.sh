@@ -26,7 +26,9 @@ else
 fi
 
 step "Folders"
-sudo install -d -o deploy -g deploy -m 755 "$BASE" "$BASE/releases" "$BASE/slots" "$BASE/shared" "$BASE/shared/static" "$BASE/shared/pages" "$BASE/runtime"
+sudo install -d -o deploy -g deploy -m 755 "$BASE" "$BASE/releases" "$BASE/slots" "$BASE/shared" "$BASE/shared/static" "$BASE/shared/pages"
+# The runtime belongs to root: neither the upload key nor the app may replace the binary the units run.
+sudo install -d -o root -g root -m 755 "$BASE/runtime"
 cp "$HERE/unavailable.html" "$BASE/shared/pages/unavailable.html"
 ls -ld "$BASE" "$BASE"/*
 
@@ -37,11 +39,12 @@ else
     work="$(mktemp -d)"
     file="node-v$NODE_VERSION-linux-x64.tar.xz"
     ( cd "$work" && curl -fsSLO "https://nodejs.org/dist/v$NODE_VERSION/$file" && curl -fsSLO "https://nodejs.org/dist/v$NODE_VERSION/SHASUMS256.txt" && grep " $file\$" SHASUMS256.txt | sha256sum -c - )
-    rm -rf "$BASE/runtime/node"
-    mkdir -p "$BASE/runtime/node"
-    tar -xJf "$work/$file" -C "$BASE/runtime/node" --strip-components=1
+    sudo rm -rf "$BASE/runtime/node"
+    sudo mkdir -p "$BASE/runtime/node"
+    sudo tar -xJf "$work/$file" -C "$BASE/runtime/node" --strip-components=1 --no-same-owner
     rm -rf "$work"
 fi
+sudo chown -R root:root "$BASE/runtime"
 "$BASE/runtime/node/bin/node" --version
 # The processor here is old; prove this Node runs on it before anything depends on it.
 "$BASE/runtime/node/bin/node" -e 'const c=require("node:crypto");console.log("node ok, scrypt", c.scryptSync("x","y",16).length)'
