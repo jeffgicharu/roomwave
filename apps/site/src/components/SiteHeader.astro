@@ -226,6 +226,11 @@ const current = Astro.url.pathname.replace(/\/$/, "") || "/";
     transform: translateY(-7px) rotate(-45deg);
   }
 
+  /* A closed menu takes no space at all, so it can never widen the page. */
+  details:not([open]) .sheet {
+    display: none;
+  }
+
   .sheet {
     position: absolute;
     left: 0;
