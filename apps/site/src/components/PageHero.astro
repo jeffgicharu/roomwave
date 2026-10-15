@@ -7,12 +7,14 @@ interface Props {
   centred?: boolean;
 }
 const { eyebrow, title, lead, dark = false, centred = false } = Astro.props;
+// Each sentence starts its own line, so two short sentences never run together on a phone.
+const sentences = title.split(/(?<=[.?!])\s+(?=[A-Z])/);
 ---
 
 <section class:list={["page-hero", { "stage-band": dark, centred }]}>
   <div class="container inner">
     <p class="eyebrow">{eyebrow}</p>
-    <h1 class="h2">{title}</h1>
+    <h1 class="h2">{sentences.map((sentence) => <span class="sentence">{sentence}</span>)}</h1>
     {lead && <p class="lead">{lead}</p>}
     <slot />
   </div>
@@ -32,6 +34,11 @@ const { eyebrow, title, lead, dark = false, centred = false } = Astro.props;
   .inner {
     display: grid;
     gap: 18px;
+  }
+
+  .sentence {
+    display: block;
+    text-wrap: balance;
   }
 
   h1 {

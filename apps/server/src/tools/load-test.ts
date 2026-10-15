@@ -23,6 +23,7 @@ import {
   type AudienceServerEvents,
   type HostClientEvents,
   type HostServerEvents,
+  type PresentationDetail,
   type Results,
   type Slide,
   type StaffHealth,
@@ -39,6 +40,9 @@ const { values } = parseArgs({
     spread: { type: "string" },
     hold: { type: "string" },
     origin: { type: "string" },
+    template: { type: "string" },
+    title: { type: "string" },
+    keep: { type: "boolean" },
   },
 });
 const base = values.base ?? "http://127.0.0.1:8300";
@@ -51,10 +55,35 @@ const rate = Number(values.rate ?? 20);
 const spread = Number(values.spread ?? 5_000);
 /** Seconds to stay connected and quiet after the last question. */
 const hold = Number(values.hold ?? 60);
+const template = values.template ?? "welcome";
+/** Leave the session running and the presentation in place, to look at afterwards. */
+const keep = values.keep ?? false;
 
 // Cloudflare checks browsers; the test introduces itself as an ordinary phone.
 const USER_AGENT = "Mozilla/5.0 (Linux; Android 14; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Mobile Safari/537.36";
-const WORDS = ["focused", "busy", "hopeful", "tired", "excited", "clear", "busy but good", "steady", "curious", "stretched"];
+// Ordered from most to least common, as a real room answers.
+const WORDS = ["busy", "hopeful", "focused", "stretched", "excited", "steady", "busy but good", "curious", "proud", "tired", "optimistic", "learning", "energised", "uncertain"];
+const QUESTIONS = [
+  "Will the new targets change how bonuses are worked out?",
+  "When will the new office layout be ready?",
+  "How will we hire for the growth you described?",
+  "Can we get the slides after the session?",
+  "What happens to the projects that were paused?",
+  "Is remote work on Fridays staying?",
+  "How do we put forward ideas for next quarter?",
+  "Which team will lead the customer portal?",
+];
+
+/** A random index from 0 to n - 1 where earlier ones come up more often. */
+function skewed(n: number): number {
+  return Math.min(n - 1, Math.floor(n * Math.random() ** 1.8));
+}
+
+/** A rating that leans positive but uses the whole scale. */
+function rating(max: number): number {
+  const value = max * 0.7 + max * 0.25 * (Math.random() + Math.random() + Math.random() - 1.5) * 1.5;
+  return Math.max(1, Math.min(max, Math.round(value)));
+}
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const now = () => performance.now();
@@ -100,7 +129,7 @@ function client(cookie: string) {
       headers: { cookie, origin, "user-agent": USER_AGENT, ...(body ? { "content-type": "application/json" } : {}) },
       body: body ? JSON.stringify(body) : undefined,
     });
-    if (!response.ok) throw new Error(`${method} ${path} answered ${response.status}`);
+    if (!response.ok) throw new Error(`${method} ${path} answered ${response.status}: ${(await response.text()).slice(0, 300)}`);
     return response.status === 204 ? (undefined as T) : ((await response.json()) as T);
   };
 }
@@ -139,7 +168,11 @@ async function main(): Promise<void> {
   let presentationId: string | null = null;
   let host: Host | null = null;
   try {
-    ({ id: presentationId } = await api<{ id: string }>("POST", "/api/presentations", { template: "welcome" }));
+    ({ id: presentationId } = await api<{ id: string }>("POST", "/api/presentations", { template }));
+    if (values.title) {
+      const { presentation: doc } = await api<{ presentation: PresentationDetail }>("GET", `/api/presentations/${presentationId}`);
+      await api("PUT", `/api/presentations/${presentationId}`, { doc: { title: values.title, theme: doc.theme, slides: doc.slides }, version: doc.version });
+    }
     const { sessionId, code } = await api<{ sessionId: string; code: string }>("POST", `/api/presentations/${presentationId}/present`);
 
     host = io(base + NAMESPACES.host, {
@@ -151,7 +184,6 @@ async function main(): Promise<void> {
     const attached = await host.timeout(10_000).emitWithAck("attach", { sessionId });
     if (!attached.ok) throw new Error(`the presenter could not attach: ${attached.error}`);
     const slides: Slide[] = attached.snapshot.slides;
-    const find = <T extends Slide["type"]>(type: T) => slides.find((s: Slide): s is Extract<Slide, { type: T }> => s.type === type)!;
 
     // What the presenter's screen shows, slide by slide, as it arrives.
     const screen = new Map<string, { at: number; respondents: number }[]>();
@@ -191,6 +223,34 @@ async function main(): Promise<void> {
     );
 
     const assertHost = host;
+
+    /** A few phones ask, the presenter shows each question, and the room upvotes. */
+    async function questions(slide: Slide): Promise<void> {
+      const go = await assertHost.emitWithAck("go", { index: slides.indexOf(slide) });
+      if (!go.ok) throw new Error(`moving to the questions failed: ${go.error}`);
+      await sleep(1_500);
+      const askers = phones.slice(0, Math.min(QUESTIONS.length, Math.max(1, Math.round(phones.length / 12))));
+      const asked: string[] = [];
+      await Promise.all(
+        askers.map(async (phone, i) => {
+          await sleep(Math.random() * spread);
+          const reply = await phone.timeout(15_000).emitWithAck("ask", { slideId: slide.id, text: QUESTIONS[i]!, name: null }).catch(() => null);
+          if (reply?.ok) asked.push(reply.question.id);
+        }),
+      );
+      for (const questionId of asked) await assertHost.emitWithAck("moderate", { questionId, status: "live" });
+      let upvotes = 0;
+      await Promise.all(
+        phones.map(async (phone) => {
+          await sleep(Math.random() * spread);
+          const questionId = asked[skewed(asked.length)];
+          if (!questionId) return;
+          const reply = await phone.timeout(15_000).emitWithAck("upvote", { questionId, on: true }).catch(() => null);
+          if (reply?.ok) upvotes += 1;
+        }),
+      );
+      console.log(`qna       asked ${asked.length} of ${askers.length}, upvotes accepted ${upvotes} of ${phones.length}.`);
+    }
     async function round(slide: Slide, answer: (i: number) => Answer, before?: () => Promise<void>): Promise<void> {
       const go = await assertHost.emitWithAck("go", { index: slides.indexOf(slide) });
       if (!go.ok) throw new Error(`moving to ${slide.type} failed: ${go.error}`);
@@ -229,30 +289,46 @@ async function main(): Promise<void> {
       );
     }
 
-    const poll = find("poll");
-    await round(poll, (i) => ({ type: "poll", optionIds: [poll.config.options[i % poll.config.options.length]!.id] }));
-    const cloud = find("wordcloud");
-    await round(cloud, (i) => ({ type: "wordcloud", text: WORDS[i % WORDS.length]! }));
-    const quiz = find("quiz");
-    await round(
-      quiz,
-      (i) => ({ type: "quiz", optionId: quiz.config.options[i % quiz.config.options.length]!.id }),
-      async () => {
-        const started = await assertHost.emitWithAck("quiz", { slideId: quiz.id, action: "start" });
-        if (!started.ok) throw new Error(`starting the quiz failed: ${started.error}`);
-      },
-    );
+    for (const slide of slides) {
+      if (slide.type === "poll") {
+        // Each slide favours a different answer, so the charts do not all look alike.
+        const order = slide.config.options.map((o) => o.id).sort(() => Math.random() - 0.5);
+        await round(slide, () => ({ type: "poll", optionIds: [order[skewed(order.length)]!] }));
+      } else if (slide.type === "scale") {
+        const max = slide.config.max;
+        await round(slide, () => ({ type: "scale", value: rating(max) }));
+      } else if (slide.type === "wordcloud") {
+        await round(slide, () => ({ type: "wordcloud", text: WORDS[skewed(WORDS.length)]! }));
+      } else if (slide.type === "quiz") {
+        const { correctOptionId, options } = slide.config;
+        const wrong = options.filter((o) => o.id !== correctOptionId).map((o) => o.id);
+        await round(
+          slide,
+          () => ({ type: "quiz", optionId: Math.random() < 0.6 ? correctOptionId : wrong[skewed(wrong.length)]! }),
+          async () => {
+            const started = await assertHost.emitWithAck("quiz", { slideId: slide.id, action: "start" });
+            if (!started.ok) throw new Error(`starting the quiz failed: ${started.error}`);
+          },
+        );
+      } else if (slide.type === "qna") {
+        await questions(slide);
+      }
+    }
 
     console.log(`Holding the room for ${hold} s.`);
     await sleep(hold * 1000);
     console.log(`Dropped connections during the test: ${dropped}.`);
 
-    const ended = await host.emitWithAck("end", {});
-    if (!ended.ok) console.log(`Ending the session failed: ${ended.error}`);
+    if (keep) {
+      console.log(`Kept: session ${sessionId}, code ${code}, presentation ${presentationId}.`);
+    } else {
+      const ended = await host.emitWithAck("end", {});
+      if (!ended.ok) console.log(`Ending the session failed: ${ended.error}`);
+    }
   } finally {
     for (const socket of sockets) socket.close();
     if (sampler) clearInterval(sampler);
-    if (presentationId) await api("DELETE", `/api/presentations/${presentationId}`).catch(() => console.log("The test presentation could not be deleted."));
+    if (presentationId && !keep) await api("DELETE", `/api/presentations/${presentationId}`).catch(() => console.log("The test presentation could not be deleted."));
     for (const [name, peak] of peaks) {
       console.log(`${name}: memory ${peak.atRest} MB at the start, ${peak.memoryMb} MB at the peak of ${peak.limitMb} MB; event loop delay up to ${peak.delayMs} ms.`);
     }
