@@ -120,7 +120,7 @@
     <dl class="stats">
       <div><dt>People</dt><dd>{s.participants}</dd></div>
       <div><dt>Answers</dt><dd>{s.responses}</dd></div>
-      <div><dt>Questions asked</dt><dd>{data.slides.filter((x) => x.type !== "content").length}</dd></div>
+      <div><dt>Slides with questions</dt><dd>{data.slides.filter((x) => x.type !== "content").length}</dd></div>
     </dl>
   </header>
 
@@ -163,8 +163,9 @@
             <p class="foot">{plural(result.respondents, "answer")}</p>
           {:else if result.type === "scale" && slide.type === "scale"}
             <div class="chart scale">
-              <ScaleChart max={slide.config.max} counts={result.counts} respondents={result.respondents} average={result.average} minLabel={slide.config.minLabel} maxLabel={slide.config.maxLabel} />
+              <ScaleChart max={slide.config.max} counts={result.counts} average={result.average} minLabel={slide.config.minLabel} maxLabel={slide.config.maxLabel} />
             </div>
+            <p class="foot">{plural(result.respondents, "answer")}</p>
           {:else if result.type === "wordcloud"}
             <div class="chart cloud"><WordCloud words={result.words} empty="Nobody sent a word." /></div>
             <p class="foot">{plural(result.entries, "word")} from {plural(result.respondents, "person", "people")}</p>
@@ -292,6 +293,7 @@
   .slides {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(min(100%, 480px), 1fr));
+    align-items: start;
     gap: 20px;
     margin: 0;
     padding: 0;
@@ -332,11 +334,12 @@
   /* The charts are sized in units; on this page one unit is a few pixels. */
   .chart {
     --unit: 8.5px;
+    --min-text: 13px;
   }
 
   .chart.scale {
-    height: 250px;
-    --unit: 7px;
+    height: 230px;
+    --unit: 8px;
   }
 
   .chart.cloud {
@@ -353,7 +356,8 @@
     }
 
     .chart.scale {
-      --unit: 5.5px;
+      height: 200px;
+      --unit: 6px;
     }
   }
 

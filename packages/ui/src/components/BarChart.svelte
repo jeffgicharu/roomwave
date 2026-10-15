@@ -120,7 +120,7 @@
   }
 
   .columns .count {
-    font-size: calc(var(--u) * 1.3);
+    font-size: max(var(--min-text, 0px), calc(var(--u) * 1.3));
     color: var(--t-muted, var(--ink-3));
     font-variant-numeric: tabular-nums;
   }
@@ -215,7 +215,7 @@
   }
 
   .rows .count {
-    font-size: calc(var(--u) * 1.25);
+    font-size: max(var(--min-text, 0px), calc(var(--u) * 1.25));
     color: var(--t-muted, var(--ink-3));
     font-variant-numeric: tabular-nums;
   }

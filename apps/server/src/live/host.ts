@@ -133,6 +133,7 @@ async function attach(
     ok: true,
     snapshot: {
       view: liveView(session),
+      presentationId: session.presentationId,
       slides: session.slides,
       results,
       participants: await onlineCount(session.id),

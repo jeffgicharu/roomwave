@@ -22,6 +22,7 @@
 </script>
 
 <div class="qr" role="img" aria-label={label}>
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -- the markup is drawn by the QR library from our own address -->
   {@html svg}
 </div>
 

@@ -159,6 +159,7 @@ export const moderateSchema = z.object({
 
 export interface HostSnapshot {
   view: LiveView;
+  presentationId: string;
   slides: Slide[];
   results: Record<string, Results>;
   participants: number;

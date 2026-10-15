@@ -16,3 +16,4 @@ coverage/
 /generated/
 /shots/
 /release/
+/.playwright-cli/

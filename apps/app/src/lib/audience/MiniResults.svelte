@@ -7,18 +7,20 @@
   const rows = $derived.by(() => {
     if (!results) return [];
     if (results.type === "poll" && slide.type === "poll") {
-      return slide.config.options.map((o) => ({ label: o.label, count: results.counts[o.id] ?? 0, of: results.respondents }));
+      // The same colour for each answer as on the big screen.
+      return slide.config.options.map((o, i) => ({ label: o.label, count: results.counts[o.id] ?? 0, of: results.respondents, color: `var(--t-c${i % 6})` }));
     }
     if (results.type === "scale" && slide.type === "scale") {
       return Array.from({ length: slide.config.max }, (_, i) => ({
         label: String(i + 1),
         count: results.counts[String(i + 1)] ?? 0,
         of: results.respondents,
+        color: "var(--t-accent)",
       }));
     }
     if (results.type === "wordcloud") {
       const top = results.words[0]?.count ?? 1;
-      return results.words.slice(0, 6).map((w) => ({ label: w.text, count: w.count, of: top }));
+      return results.words.slice(0, 6).map((w) => ({ label: w.text, count: w.count, of: top, color: "var(--t-accent)" }));
     }
     return [];
   });
@@ -36,7 +38,7 @@
     </h3>
     <ul class:compact={slide.type === "scale"}>
       {#each rows as row (row.label)}
-        <li style={`--share:${row.count / most}`}>
+        <li style={`--share:${row.count / most};--c:${row.color}`}>
           <span class="label">{row.label}</span>
           <span class="track"><span class="fill"></span></span>
           <span class="value">{results?.type === "wordcloud" ? row.count : `${row.of ? Math.round((row.count / row.of) * 100) : 0}%`}</span>
@@ -98,7 +100,7 @@
     display: block;
     height: 100%;
     border-radius: inherit;
-    background: var(--t-accent);
+    background: var(--c);
     transform-origin: 0 50%;
     transform: scaleX(max(var(--share), 0.02));
     transition: transform 500ms var(--ease-spring);

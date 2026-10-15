@@ -29,7 +29,7 @@
       {/each}
     </ol>
   {:else}
-    <p class="empty">{hint}</p>
+    <p class="empty">{answered ? "Every question so far has been answered. Ask another from your phone." : hint}</p>
   {/if}
   {#if answered}
     <p class="answered">{answered} answered</p>

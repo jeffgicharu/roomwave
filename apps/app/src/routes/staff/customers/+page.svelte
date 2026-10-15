@@ -43,6 +43,7 @@
   });
 
   function go(next: { plan?: string; page?: number; q?: string }) {
+    // eslint-disable-next-line svelte/prefer-svelte-reactivity -- built and used once, never watched
     const params = new URLSearchParams();
     const p = next.plan ?? plan;
     const q = next.q ?? query;

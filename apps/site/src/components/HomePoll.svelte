@@ -230,6 +230,7 @@
   }
 
   .note {
+    min-height: 2.9em;
     font-size: 0.9rem;
     color: var(--stage-muted);
   }

@@ -139,7 +139,6 @@
         <ScaleChart
           max={slide.config.max}
           counts={shown.counts}
-          respondents={shown.respondents}
           average={shown.average}
           minLabel={slide.config.minLabel}
           maxLabel={slide.config.maxLabel}
@@ -162,8 +161,12 @@
             stroke-linecap="round"
           /></svg
         >
-        {respondents}
-        {slide.type === "qna" ? (respondents === 1 ? "question" : "questions") : respondents === 1 ? "answer" : "answers"}
+        {#if shown.type === "wordcloud"}
+          {shown.respondents} {shown.respondents === 1 ? "person" : "people"} · {shown.entries} {shown.entries === 1 ? "word" : "words"}
+        {:else}
+          {respondents}
+          {slide.type === "qna" ? (respondents === 1 ? "question" : "questions") : respondents === 1 ? "answer" : "answers"}
+        {/if}
       </span>
       {#if slideState.locked}<span class="locked">Answers closed</span>{/if}
     </footer>

@@ -9,7 +9,6 @@
     type LiveView,
     type Question,
     type Results,
-    type Slide,
   } from "@roomwave/shared";
   import { Mark, SlideView, THEMES_BY_ID } from "@roomwave/ui";
 
@@ -27,11 +26,11 @@
   const clock = new ServerClock();
 
   let view = $state<LiveView | null>(null);
-  let slides = $state<Slide[]>([]);
   let results = $state<Record<string, Results>>({});
   let boards = $state<Record<string, LeaderboardEntry[]>>({});
   let participants = $state(0);
   let remoteToken = $state<string | null>(null);
+  let presentationId = $state<string | null>(null);
   let connected = $state(false);
   let problem = $state("");
   let ended = $state(false);
@@ -71,10 +70,10 @@
       const snap: HostSnapshot = reply.snapshot;
       clock.sync(snap.view.serverNow);
       view = snap.view;
-      slides = snap.slides;
       results = snap.results;
       participants = snap.participants;
       remoteToken = snap.remoteToken;
+      presentationId = snap.presentationId;
       ended = snap.view.ended;
       problem = "";
     });
@@ -217,9 +216,12 @@
     <div class="center-message">
       <Mark size={48} />
       <h1>The session has ended</h1>
-      <p>{plural(participants, "person", "people")} still connected have been told. Every answer is saved.</p>
+      <p>Everyone still connected has been told, and every answer is saved.</p>
       <div class="end-actions">
-        <a class="btn btn-signal" href={view ? `/app` : "/app"}>Back to your presentations</a>
+        {#if presentationId}
+          <a class="btn btn-signal" href={`/app/presentations/${presentationId}/sessions/${sessionId}`}>See the results</a>
+        {/if}
+        <a class="btn btn-ghost on-dark" href="/app">Back to your presentations</a>
       </div>
     </div>
   {:else if !view || !slide}
@@ -460,6 +462,11 @@
 
   .center-message p {
     color: var(--stage-muted);
+  }
+
+  .on-dark {
+    --btn-fg: var(--stage-text);
+    --btn-border: var(--stage-line);
   }
 
   .end-actions {

@@ -44,6 +44,7 @@
   let pollChoice = $state<string[]>([]);
   let word = $state("");
   let question = $state("");
+  let sentNote = $state("");
   let askName = $state("");
   let editingName = $state(false);
   let nameDraft = $state("");
@@ -104,6 +105,7 @@
       clock.sync(next.serverNow);
       if (view?.slide.id !== next.slide.id) {
         notice = "";
+        sentNote = "";
         pollChoice = [];
         word = "";
       }
@@ -161,6 +163,7 @@
     busy = true;
     notice = "";
     const slideId = slide.id;
+    sentNote = "";
     socket.timeout(8000).emit("ask", { slideId, text: question, name: askName.trim() || null }, (error, reply) => {
       busy = false;
       if (error || !reply) return void (notice = "Your question did not go through. Try again.");
@@ -170,7 +173,7 @@
       const upvoted = before?.type === "qna" ? before.upvoted : [];
       mine = { ...mine, [slideId]: { type: "qna", asked: [...asked, reply.question], upvoted } };
       question = "";
-      notice = reply.question.status === "pending" ? "Sent. It appears once the presenter approves it." : "Sent.";
+      sentNote = reply.question.status === "pending" ? "Sent. It shows once the presenter approves it." : "Sent. It is on the list below.";
     });
   }
 
@@ -259,7 +262,10 @@
             <p class="kind">On screen now</p>
             <h1 class="q">{slide.config.heading || "Look at the screen"}</h1>
             {#if slide.config.body}<p class="body-text">{slide.config.body}</p>{/if}
-            <p class="hint">Questions appear here when the presenter asks one.</p>
+            <div class="joined">
+              <span class="pulse" aria-hidden="true"></span>
+              <p><strong>You're in{name ? ` as ${name}` : ""}.</strong> Keep this page open; questions appear here when the presenter asks one.</p>
+            </div>
           {:else}
             <p class="kind">
               {#if slide.type === "quiz"}Quiz{:else if slide.type === "poll"}{slide.config.multiple ? "Pick any" : "Pick one"}{:else if slide.type === "scale"}Rate it{:else if slide.type === "wordcloud"}In a word{:else}Ask a question{/if}
@@ -344,7 +350,14 @@
                   <input id="word" bind:value={word} maxlength={LIMITS.wordLength} autocomplete="off" autocapitalize="off" enterkeyhint="send" placeholder="Type a word or two" />
                   <button type="submit" class="action" disabled={busy || !word.trim()}>Send</button>
                 </form>
-                <p class="hint">{slide.config.maxEntries - entries.length} of {slide.config.maxEntries} left · up to 3 words each</p>
+                {@const left = slide.config.maxEntries - entries.length}
+                <p class="hint">
+                  {#if !entries.length}
+                    {left === 1 ? "One answer" : `Up to ${left} answers`}, three words at most in each.
+                  {:else}
+                    You can send {left} more.
+                  {/if}
+                </p>
               {/if}
               {#if entries.length}
                 <ul class="chips" aria-label="You sent">
@@ -371,7 +384,7 @@
               </div>
 
               {#if phase === "ready"}
-                <p class="waiting">Get ready. The answers appear when the presenter starts the timer.</p>
+                <p class="waiting">Read the answers on the screen, then tap yours here when the timer starts.</p>
               {:else if phase === "open"}
                 <div class="countdown" aria-hidden="true"><span style={`--left:${(remaining ?? 0) / quizLimit}`}></span></div>
                 <p class="seconds">{Math.ceil(remaining ?? 0)} seconds</p>
@@ -427,6 +440,7 @@
                   <button type="submit" class="action" disabled={busy || question.trim().length < 2}>Send question</button>
                 </form>
               {/if}
+              {#if sentNote}<p class="sent" role="status">✓ {sentNote}</p>{/if}
               {#each mineQna.asked.filter((q) => q.status === "pending" && !shown.some((s) => s.id === q.id)) as pendingQ (pendingQ.id)}
                 <p class="pending">Waiting for approval: “{pendingQ.text}”</p>
               {/each}
@@ -582,6 +596,33 @@
   .hint {
     margin-top: 10px;
     font-size: 0.88rem;
+  }
+
+  .joined {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-top: 22px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--t-surface);
+    border: 1px solid var(--t-line);
+    color: var(--t-muted);
+    font-size: 0.95rem;
+  }
+
+  .joined strong {
+    color: var(--t-text);
+  }
+
+  .pulse {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    margin-top: 0.45em;
+    border-radius: 50%;
+    background: var(--t-correct);
+    animation: rw-pulse 1.6s ease-in-out infinite;
   }
 
   .closed {

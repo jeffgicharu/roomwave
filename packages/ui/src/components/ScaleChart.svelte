@@ -2,13 +2,12 @@
   interface Props {
     max: number;
     counts: Record<string, number>;
-    respondents: number;
     average: number | null;
     minLabel: string;
     maxLabel: string;
   }
 
-  let { max, counts, respondents, average, minLabel, maxLabel }: Props = $props();
+  let { max, counts, average, minLabel, maxLabel }: Props = $props();
 
   const values = $derived(Array.from({ length: max }, (_, i) => i + 1));
   const top = $derived(Math.max(1, ...values.map((v) => counts[String(v)] ?? 0)));
@@ -19,7 +18,7 @@
 <div class="scale">
   <div class="summary">
     <span class="average">{average === null ? "–" : average.toFixed(1)}</span>
-    <span class="of">average out of {max}<br />{respondents} {respondents === 1 ? "answer" : "answers"}</span>
+    <span class="of">average out of {max}</span>
   </div>
 
   <div class="plot" style={`--n:${max}`}>
@@ -72,7 +71,7 @@
   }
 
   .of {
-    font-size: calc(var(--u) * 1.4);
+    font-size: max(var(--min-text, 0px), calc(var(--u) * 1.4));
     color: var(--t-muted, var(--ink-3));
     line-height: 1.35;
   }
@@ -100,7 +99,7 @@
   }
 
   .count {
-    font-size: calc(var(--u) * 1.3);
+    font-size: max(var(--min-text, 0px), calc(var(--u) * 1.3));
     color: var(--t-muted, var(--ink-3));
     font-variant-numeric: tabular-nums;
   }
@@ -125,7 +124,7 @@
 
   .value {
     font-family: var(--font-display);
-    font-size: calc(var(--u) * 1.7);
+    font-size: max(var(--min-text, 0px), calc(var(--u) * 1.7));
     font-weight: 700;
   }
 
@@ -150,7 +149,7 @@
     display: flex;
     justify-content: space-between;
     gap: calc(var(--u) * 2);
-    font-size: calc(var(--u) * 1.35);
+    font-size: max(var(--min-text, 0px), calc(var(--u) * 1.35));
     font-weight: 600;
     color: var(--t-muted, var(--ink-3));
   }

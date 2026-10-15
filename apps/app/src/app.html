@@ -11,8 +11,22 @@
     <link rel="manifest" href="/site.webmanifest" />
     <title>Roomwave</title>
     %sveltekit.head%
+    <style>
+      .boot { position: fixed; inset: 0; display: grid; place-items: center; background: #fbf7f0; z-index: 1; }
+      .boot rect { transform-box: fill-box; transform-origin: 50% 100%; animation: boot-rise 1.2s ease-out infinite alternate; }
+      .boot rect:nth-child(2) { animation-delay: -0.25s; }
+      .boot rect:nth-child(3) { animation-delay: -0.5s; }
+      .boot rect:nth-child(4) { animation-delay: -0.75s; }
+      .boot rect:nth-child(5) { animation-delay: -1s; }
+      @keyframes boot-rise { from { transform: scaleY(0.45); } to { transform: scaleY(1); } }
+      /* The start-up script lives in the same container; anything else means the app has drawn. */
+      body:has(.app > :not(script)) .boot { display: none; }
+    </style>
   </head>
   <body data-sveltekit-preload-data="hover">
-    <div style="display: contents">%sveltekit.body%</div>
+    <div class="boot" aria-hidden="true">
+      <svg viewBox="0 0 33 24" width="46" height="34"><rect x="0" y="15" width="5" height="9" rx="2.5" fill="#ff6a2b"/><rect x="7" y="9" width="5" height="15" rx="2.5" fill="#ff6a2b"/><rect x="14" y="2" width="5" height="22" rx="2.5" fill="#ff6a2b"/><rect x="21" y="9" width="5" height="15" rx="2.5" fill="#ff6a2b"/><rect x="28" y="0" width="5" height="24" rx="2.5" fill="#ff6a2b"/></svg>
+    </div>
+    <div class="app" style="display: contents">%sveltekit.body%</div>
   </body>
 </html>
