@@ -37,16 +37,20 @@ async function log(email: Email, status: SendOutcome, detail: string | null): Pr
     .execute();
 }
 
+/** Why an email to this address cannot go out now: the reason for the log and words for the person. */
+export interface Hold {
+  detail: string;
+  message: string;
+}
+
 /**
- * Sends through Resend. The whole site may send EMAIL_DAILY_CAP emails in any
- * 24 hours (its share of the account's daily allowance), and one address at
- * most three. Anything over the cap is recorded and not sent.
+ * The whole site may send EMAIL_DAILY_CAP emails in any 24 hours (its share
+ * of the account's daily allowance), and one address at most three.
  */
-export async function sendEmail(email: Email): Promise<SendOutcome> {
-  const domain = email.to.split("@")[1] ?? "";
+export async function emailHold(to: string): Promise<Hold | null> {
+  const domain = to.split("@")[1] ?? "";
   if (!domain || RESERVED.test(domain)) {
-    await log(email, "skipped", "reserved domain");
-    return "skipped";
+    return { detail: "reserved domain", message: `We cannot deliver email to ${to}. Change the email on your account, or download the PDF.` };
   }
   const [{ total }, { mine }] = await Promise.all([
     db
@@ -59,24 +63,30 @@ export async function sendEmail(email: Email): Promise<SendOutcome> {
       .selectFrom("email_log")
       .select((eb) => eb.fn.countAll<number>().as("mine"))
       .where("status", "=", "sent")
-      .where("to_address", "=", email.to)
+      .where("to_address", "=", to)
       .where("created_at", ">=", sql<Date>`now() - interval '24 hours'`)
       .executeTakeFirstOrThrow(),
   ]);
   if (Number(total) >= config.EMAIL_DAILY_CAP) {
-    await log(email, "skipped", "daily cap reached");
-    return "skipped";
+    return { detail: "daily cap reached", message: "We have sent all the email we can today. Download the PDF instead, or try again tomorrow." };
   }
   if (Number(mine) >= 3) {
-    await log(email, "skipped", "address cap reached");
-    return "skipped";
+    return { detail: "address cap reached", message: "That address has had three emails from us today. Download the PDF instead." };
   }
   if (!(await domainTakesMail(domain))) {
-    await log(email, "skipped", "domain takes no mail");
-    return "skipped";
+    return { detail: "domain takes no mail", message: `We cannot deliver email to ${to}. Change the email on your account, or download the PDF.` };
   }
   if (!config.RESEND_API_KEY) {
-    await log(email, "skipped", "no sending key configured");
+    return { detail: "no sending key configured", message: "Emailed reports are not available right now. Download the PDF instead." };
+  }
+  return null;
+}
+
+/** Sends through Resend, unless something holds it back; then it is recorded and not sent. */
+export async function sendEmail(email: Email): Promise<SendOutcome> {
+  const hold = await emailHold(email.to);
+  if (hold) {
+    await log(email, "skipped", hold.detail);
     return "skipped";
   }
 

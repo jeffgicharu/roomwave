@@ -41,7 +41,9 @@ function memoryBytes(file: string | null): number {
  * staff health screen reads it. The entry expires if the process stops.
  */
 export function reportHealth(name: string, limitMb: number, connections: () => number | null): () => void {
-  const delay = monitorEventLoopDelay({ resolution: 20 });
+  // The histogram records the whole timer interval, so an idle loop reads about RESOLUTION ms; the delay is what is left over.
+  const RESOLUTION = 20;
+  const delay = monitorEventLoopDelay({ resolution: RESOLUTION });
   delay.enable();
   const started = Date.now();
   const cgroupFile = cgroupMemoryFile();
@@ -55,7 +57,7 @@ export function reportHealth(name: string, limitMb: number, connections: () => n
       memoryMb: Math.round(memoryBytes(cgroupFile) / 1048576),
       heapUsedMb: Math.round(memory.heapUsed / 1048576),
       limitMb,
-      eventLoopDelayMs: Math.round((delay.percentile(99) / 1e6) * 10) / 10,
+      eventLoopDelayMs: Math.round(Math.max(0, delay.percentile(99) / 1e6 - RESOLUTION) * 10) / 10,
       connections: connections(),
       reportedAt: new Date().toISOString(),
     };

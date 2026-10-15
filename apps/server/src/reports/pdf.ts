@@ -52,6 +52,10 @@ function when(date: Date): string {
   });
 }
 
+function count(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
 function share(part: number, whole: number): string {
   return whole ? `${Math.round((part / whole) * 100)}%` : "0%";
 }
@@ -107,9 +111,9 @@ export function renderReport(input: ReportInput): Promise<Buffer> {
     doc.font("text").fontSize(10).fillColor(MUTED).text(label, x, statsY + 30, { width: 160 });
   };
   const interactive = input.slides.filter((s) => s.type !== "content").length;
-  stat(MARGIN, String(input.participants), "people took part");
-  stat(MARGIN + 170, String(input.responses), "answers given");
-  stat(MARGIN + 340, String(interactive), "questions asked");
+  stat(MARGIN, String(input.participants), input.participants === 1 ? "person took part" : "people took part");
+  stat(MARGIN + 170, String(input.responses), input.responses === 1 ? "answer given" : "answers given");
+  stat(MARGIN + 340, String(interactive), interactive === 1 ? "slide with a question" : "slides with questions");
   doc.y = statsY + 58;
   doc.moveTo(MARGIN, doc.y).lineTo(PAGE_WIDTH - MARGIN, doc.y).lineWidth(1).strokeColor(LINE).stroke();
   doc.moveDown(1.2);
@@ -139,7 +143,17 @@ export function renderReport(input: ReportInput): Promise<Buffer> {
     const result = input.results[slide.id];
     if (slide.type === "content" || !result) continue;
 
-    ensure(90);
+    // A slide's question and its rows stay on one page whenever they fit on one.
+    const rows =
+      slide.type === "poll" || slide.type === "quiz"
+        ? slide.config.options.length
+        : slide.type === "scale"
+          ? slide.config.max
+          : result.type === "wordcloud"
+            ? Math.max(1, Math.min(15, result.words.length))
+            : 2;
+    const questionHeight = doc.font("display").fontSize(15).heightOfString(slide.config.question, { width: CONTENT });
+    ensure(Math.min(16 + questionHeight + 10 + rows * 22 + 18, bottom() - doc.page.margins.top));
     doc
       .font("strong")
       .fontSize(9)
@@ -174,7 +188,7 @@ export function renderReport(input: ReportInput): Promise<Buffer> {
         .font("text")
         .fontSize(9.5)
         .fillColor(MUTED)
-        .text(`${result.entries} words from ${result.respondents} people${result.words.length > 15 ? "  ·  the 15 most common shown" : ""}`, MARGIN);
+        .text(`${count(result.entries, "word", "words")} from ${count(result.respondents, "person", "people")}${result.words.length > 15 ? "  ·  the 15 most common shown" : ""}`, MARGIN);
     } else if (result.type === "qna") {
       const questions = result.questions.filter((q) => q.status === "live" || q.status === "answered");
       if (!questions.length) doc.font("text").fontSize(10.5).fillColor(MUTED).text("No questions were asked.");

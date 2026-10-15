@@ -296,8 +296,20 @@ async function seedSampleDecks(): Promise<void> {
   if (added) console.log(`Added ${added} presentations to sample customers.`);
 }
 
+/** A sample customer was last seen no earlier than their latest session ended. */
+async function alignSampleActivity(): Promise<void> {
+  await sql`
+    update users u
+       set last_active_at = s.last
+      from (select owner_id, max(ended_at) as last from live_sessions where ended_at is not null group by owner_id) s
+     where u.id = s.owner_id
+       and u.is_sample
+       and (u.last_active_at is null or u.last_active_at < s.last)`.execute(db);
+}
+
 await seedHomePolls();
 await seedStaff();
 await seedSampleCustomers();
 await seedSampleDecks();
+await alignSampleActivity();
 await closeDatabase();

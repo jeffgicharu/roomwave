@@ -15,6 +15,7 @@ import {
 import { requireUser } from "../auth/sessions.ts";
 import { db } from "../db/database.ts";
 import type { UserRow } from "../db/schema.ts";
+import { emailHold } from "../email/send.ts";
 import { HttpError, notFound, tooMany } from "../http/errors.ts";
 import { enqueue } from "../jobs/queue.ts";
 import { endLiveSession } from "../live/control.ts";
@@ -106,7 +107,9 @@ export async function allResults(sessionId: string, slides: Slide[]): Promise<Re
 
 function fileName(title: string, startedAt: Date, extension: string): string {
   const base = title.replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "").slice(0, 60) || "results";
-  return `${base}-${startedAt.toISOString().slice(0, 10)}.${extension}`;
+  // The date the room saw: Nairobi time, written year-month-day (the Canadian English format is exactly that).
+  const day = startedAt.toLocaleDateString("en-CA", { timeZone: "Africa/Nairobi" });
+  return `${base}-${day}.${extension}`;
 }
 
 export async function sessionRoutes(app: FastifyInstance): Promise<void> {
@@ -205,6 +208,9 @@ export async function sessionRoutes(app: FastifyInstance): Promise<void> {
     if (!user.email || user.is_guest) {
       throw new HttpError(409, "no_email", "Add an email address to your account first.");
     }
+    // Say so now if it cannot go out, rather than promise an email that never comes.
+    const hold = await emailHold(user.email);
+    if (hold) throw new HttpError(409, "email_held", hold.message);
     if (!(await allow("email-report", user.id, 3, 86_400))) throw tooMany();
     await enqueue({ kind: "session_report", sessionId: row.id, userId: user.id });
     return reply.code(202).send({ ok: true, to: user.email });
