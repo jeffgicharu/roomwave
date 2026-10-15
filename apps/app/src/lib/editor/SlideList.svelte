@@ -216,7 +216,8 @@
   }
 
   .title {
-    display: grid;
+    display: flex;
+    flex-direction: column;
     min-width: 0;
   }
 
@@ -231,11 +232,16 @@
     color: var(--ink-3);
   }
 
+  /* Two lines, so most questions can be told apart at a glance. */
   .words {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: anywhere;
     font-size: 0.92rem;
+    line-height: 1.3;
     font-weight: 500;
   }
 
