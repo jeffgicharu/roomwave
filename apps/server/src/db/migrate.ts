@@ -2,10 +2,14 @@ import type { Kysely } from "kysely";
 import { Migrator, type Migration, type MigrationProvider } from "kysely/migration";
 
 import * as initial from "./migrations/0001_initial.ts";
+import * as sampleRequests from "./migrations/0002_sample_requests.ts";
+import * as sampleAnswerTimes from "./migrations/0003_sample_answer_times.ts";
 
 // Listed by hand rather than read from a folder, so the bundled server carries them.
 const migrations: Record<string, Migration> = {
   "0001_initial": initial,
+  "0002_sample_requests": sampleRequests,
+  "0003_sample_answer_times": sampleAnswerTimes,
 };
 
 const provider: MigrationProvider = {

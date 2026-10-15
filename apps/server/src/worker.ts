@@ -6,13 +6,13 @@ import pino from "pino";
 import { config } from "./config.ts";
 import { closeDatabase } from "./db/database.ts";
 import { reportHealth } from "./health.ts";
-import { cleanUp, emailSessionReport, renderSessionReport, rotateHomePoll, sendPasswordReset } from "./jobs/handlers.ts";
+import { cleanUp, emailSessionReport, refreshSamples, renderSessionReport, rotateHomePoll, sendPasswordReset } from "./jobs/handlers.ts";
 import { BULL_PREFIX, QUEUE_NAME, workQueue, type JobData } from "./jobs/queue.ts";
 import { createRedis, redis } from "./redis.ts";
 
 const log = pino({ level: config.NODE_ENV === "production" ? "info" : "warn", name: "worker" });
 
-type ScheduledJob = { kind: "clean_up" } | { kind: "rotate_home_poll" };
+type ScheduledJob = { kind: "clean_up" } | { kind: "rotate_home_poll" } | { kind: "refresh_samples" };
 
 async function run(job: Job<JobData | ScheduledJob>): Promise<unknown> {
   const data = job.data;
@@ -28,6 +28,8 @@ async function run(job: Job<JobData | ScheduledJob>): Promise<unknown> {
       return cleanUp();
     case "rotate_home_poll":
       return rotateHomePoll();
+    case "refresh_samples":
+      return refreshSamples();
   }
 }
 
@@ -48,6 +50,11 @@ await queue.upsertJobScheduler(
   "rotate-home-poll",
   { pattern: "30 1 * * *" },
   { name: "rotate_home_poll", data: { kind: "rotate_home_poll" } },
+);
+await queue.upsertJobScheduler(
+  "refresh-samples",
+  { pattern: "40 1 * * *" },
+  { name: "refresh_samples", data: { kind: "refresh_samples" } },
 );
 
 // Answers the deploy's question "did the new worker start?".

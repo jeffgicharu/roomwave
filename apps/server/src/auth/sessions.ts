@@ -106,6 +106,7 @@ export async function toUser(row: UserRow): Promise<User> {
     email: row.email,
     role: row.role,
     isGuest: row.is_guest,
+    isSample: row.is_sample,
     guestExpiresAt: row.guest_expires_at?.toISOString() ?? null,
     plan: effectivePlan(row.plan, row.trial_ends_at),
     presentationCount: Number(count),

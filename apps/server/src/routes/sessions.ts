@@ -28,6 +28,8 @@ async function sessionFor(id: string, user: UserRow) {
   if (!UUID.test(id)) throw notFound("That session");
   let query = db.selectFrom("live_sessions").selectAll().where("id", "=", id);
   if (user.role !== "staff") query = query.where("owner_id", "=", user.id);
+  // The staff training account reaches sample customers' sessions only.
+  else if (user.is_sample) query = query.where("owner_id", "in", db.selectFrom("users").select("id").where("is_sample", "=", true));
   const row = await query.executeTakeFirst();
   if (!row) throw notFound("That session");
   return row;

@@ -90,6 +90,8 @@ export interface User {
   email: string | null;
   role: "customer" | "staff";
   isGuest: boolean;
+  /** A shared account that works on sample data only, such as the staff training account. */
+  isSample: boolean;
   guestExpiresAt: string | null;
   plan: PlanStatus;
   presentationCount: number;

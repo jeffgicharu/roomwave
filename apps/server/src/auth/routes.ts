@@ -12,6 +12,7 @@ import { db } from "../db/database.ts";
 import { HttpError, parse, tooMany } from "../http/errors.ts";
 import { enqueue } from "../jobs/queue.ts";
 import { insertFromTemplate } from "../routes/presentations-store.ts";
+import { TRAINING_STAFF } from "../samples.ts";
 import { hashPassword, verifyPassword } from "../security/passwords.ts";
 import { allow } from "../security/ratelimit.ts";
 import { hashToken, keyedHash, newToken } from "../security/tokens.ts";
@@ -72,6 +73,22 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     }
     await startSession(reply, request, user.id);
     await db.updateTable("users").set({ last_active_at: new Date() }).where("id", "=", user.id).execute();
+    return { user: await toUser(user) };
+  });
+
+  // The staff console as the training account, with no password: it reaches
+  // sample customers only, and what it changes is undone each night.
+  app.post("/api/auth/training", async (request, reply) => {
+    if (!(await allow("training", keyedHash(request.ip), 30, 3600))) throw tooMany();
+    const user = await db
+      .selectFrom("users")
+      .selectAll()
+      .where("email", "=", TRAINING_STAFF.email)
+      .where("role", "=", "staff")
+      .where("is_sample", "=", true)
+      .executeTakeFirst();
+    if (!user) throw new HttpError(404, "not_found", "The training account is not set up.");
+    await startSession(reply, request, user.id);
     return { user: await toUser(user) };
   });
 

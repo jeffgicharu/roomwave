@@ -140,6 +140,7 @@ export interface ContactRequestsTable {
   created_at: Generated<Date>;
   handled_at: NullableTimestamp;
   handled_by: string | null;
+  is_sample: Generated<boolean>;
 }
 
 export interface EmailLogTable {

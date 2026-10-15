@@ -70,6 +70,10 @@ export function startLiveServer(httpServer: HttpServer): LiveServer {
       // and nginx sends it to the release that is now live.
       io.engine.close();
       await new Promise<void>((resolve) => io.close(() => resolve()));
+      // The adapter has just queued one unsubscribe per namespace. Replies come
+      // back in order, so once a ping is answered they have been, and the
+      // connections can go without leaving them unanswered.
+      await Promise.all([pub.ping().catch(() => {}), sub.ping().catch(() => {})]);
       pub.disconnect();
       sub.disconnect();
     },

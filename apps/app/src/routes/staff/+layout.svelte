@@ -61,6 +61,9 @@
           </a>
         {/each}
       </nav>
+      {#if session.user?.isSample}
+        <p class="training"><strong>Training account</strong> Sample customers only. Changes are undone each night.</p>
+      {/if}
       <div class="who">
         <span class="avatar" aria-hidden="true">{session.user?.name.slice(0, 1)}</span>
         <span class="name">{session.user?.name}</span>
@@ -99,7 +102,7 @@
     position: sticky;
     top: 0;
     display: grid;
-    grid-template-rows: auto 1fr auto;
+    grid-template-rows: auto 1fr auto auto;
     gap: 24px;
     height: 100dvh;
     padding: 22px 14px;
@@ -114,6 +117,24 @@
     gap: 10px;
     padding: 0 8px;
     text-decoration: none;
+  }
+
+  .training {
+    display: grid;
+    gap: 2px;
+    margin: 0 4px;
+    padding: 12px 14px;
+    border-radius: var(--radius-m);
+    background: rgb(255 194 61 / 0.12);
+    border: 1px solid rgb(255 194 61 / 0.3);
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--stage-muted);
+  }
+
+  .training strong {
+    color: var(--sun);
+    font-weight: 700;
   }
 
   .tag {
@@ -251,6 +272,12 @@
 
     .name {
       display: none;
+    }
+
+    .training {
+      grid-column: 1 / -1;
+      grid-row: 3;
+      margin: 0;
     }
   }
 </style>

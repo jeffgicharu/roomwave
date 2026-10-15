@@ -15,6 +15,7 @@ import {
 } from "@roomwave/shared";
 
 import { SESSION_COOKIE, userFromToken } from "../auth/sessions.ts";
+import { db } from "../db/database.ts";
 import { endLiveSession, goTo, quizAction, resetSlide, setSlideFlags } from "./control.ts";
 import { onlineCount, scheduleResults, sessionRoom, type HostData, type HostNamespace } from "./hub.ts";
 import { moderateQuestion } from "./questions.ts";
@@ -112,7 +113,14 @@ async function attach(
     if (!user || user.suspended_at) return { ok: false, error: "signed_out" };
     session = await getSession(input.sessionId);
     if (!session) return { ok: false, error: "not_found" };
-    if (session.ownerId !== user.id && user.role !== "staff") return { ok: false, error: "forbidden" };
+    if (session.ownerId !== user.id) {
+      if (user.role !== "staff") return { ok: false, error: "forbidden" };
+      // The staff training account reaches sample customers' sessions only.
+      if (user.is_sample) {
+        const owner = await db.selectFrom("users").select("is_sample").where("id", "=", session.ownerId).executeTakeFirst();
+        if (!owner?.is_sample) return { ok: false, error: "forbidden" };
+      }
+    }
     role = "presenter";
     socket.data.userId = user.id;
   }

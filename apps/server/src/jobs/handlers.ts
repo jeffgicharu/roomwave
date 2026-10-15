@@ -5,8 +5,10 @@ import { passwordResetEmail, sessionReportEmail } from "../email/templates.ts";
 import { sendEmail } from "../email/send.ts";
 import { config } from "../config.ts";
 import { leaderboard } from "../live/results.ts";
+import { key, redis } from "../redis.ts";
 import { renderReport } from "../reports/pdf.ts";
 import { allResults, resultsFingerprint } from "../routes/sessions.ts";
+import { SAMPLE_CUSTOMERS, SAMPLE_REQUESTS, TRAINING_STAFF } from "../samples.ts";
 
 export async function sendPasswordReset(userId: string, token: string): Promise<void> {
   const user = await db.selectFrom("users").select(["name", "email", "is_sample"]).where("id", "=", userId).executeTakeFirst();
@@ -161,4 +163,67 @@ export async function rotateHomePoll(): Promise<string | null> {
     await trx.deleteFrom("home_votes").where("poll_id", "=", next.id).execute();
     return next.id;
   });
+}
+
+/**
+ * Nightly: sample customers stay current and the staff training account's
+ * changes are undone. Every sample date moves forward by the time since the
+ * last run, so the sample business always looks like it did yesterday; then
+ * plans, trials, suspensions and requests go back to their definitions.
+ */
+export async function refreshSamples(): Promise<Record<string, number | string>> {
+  const anchorKey = key("samples", "anchor");
+  const previous = Number(await redis.get(anchorKey)) || null;
+  const now = Date.now();
+  const shift = previous ? Math.max(0, Math.round((now - previous) / 1000)) : 0;
+  const by = sql`make_interval(secs => ${shift})`;
+  const owners = sql`(select id from users where is_sample)`;
+  const sessions = sql`(select id from live_sessions where owner_id in ${owners})`;
+
+  await db.transaction().execute(async (trx) => {
+    if (shift > 0) {
+      await sql`update users set created_at = created_at + ${by}, last_active_at = last_active_at + ${by} where is_sample`.execute(trx);
+      await sql`update presentations set created_at = created_at + ${by}, updated_at = updated_at + ${by} where owner_id in ${owners}`.execute(trx);
+      await sql`update live_sessions set started_at = started_at + ${by}, ended_at = ended_at + ${by}, last_activity_at = last_activity_at + ${by} where owner_id in ${owners} and ended_at is not null`.execute(trx);
+      await sql`update participants set joined_at = joined_at + ${by} where session_id in ${sessions}`.execute(trx);
+      await sql`update responses set created_at = created_at + ${by}, updated_at = updated_at + ${by} where session_id in ${sessions}`.execute(trx);
+      await sql`update questions set created_at = created_at + ${by}, answered_at = answered_at + ${by} where session_id in ${sessions}`.execute(trx);
+      await sql`update question_votes set created_at = created_at + ${by} where question_id in (select id from questions where session_id in ${sessions})`.execute(trx);
+      // Saved reports carry the old dates.
+      await sql`delete from report_files where session_id in ${sessions}`.execute(trx);
+    }
+    await trx.updateTable("users").set({ suspended_at: null }).where("is_sample", "=", true).execute();
+    await trx.updateTable("contact_requests").set({ handled_at: null, handled_by: null }).where("is_sample", "=", true).execute();
+    for (const customer of SAMPLE_CUSTOMERS) {
+      await trx
+        .updateTable("users")
+        .set({
+          plan: customer.plan,
+          trial_ends_at: customer.trialDays ? new Date(now + customer.trialDays * 86_400_000) : null,
+          suspended_at: null,
+        })
+        .where("email", "=", customer.email)
+        .where("is_sample", "=", true)
+        .execute();
+    }
+    for (const request of SAMPLE_REQUESTS) {
+      await trx
+        .updateTable("contact_requests")
+        .set({
+          created_at: new Date(now - request.hoursAgo * 3_600_000),
+          handled_at: request.handledHoursAgo === undefined ? null : new Date(now - request.handledHoursAgo * 3_600_000),
+          handled_by: null,
+        })
+        .where("email", "=", request.email)
+        .where("is_sample", "=", true)
+        .execute();
+    }
+    const training = await trx.selectFrom("users").select("id").where("email", "=", TRAINING_STAFF.email).where("is_sample", "=", true).executeTakeFirst();
+    if (training) {
+      await trx.deleteFrom("staff_actions").where("staff_id", "=", training.id).execute();
+      await trx.deleteFrom("presentations").where("owner_id", "=", training.id).execute();
+    }
+  });
+  await redis.set(anchorKey, String(now));
+  return { movedBySeconds: shift, customers: SAMPLE_CUSTOMERS.length, requests: SAMPLE_REQUESTS.length };
 }

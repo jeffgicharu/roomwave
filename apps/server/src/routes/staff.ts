@@ -14,6 +14,7 @@ import {
 import { requireStaff } from "../auth/sessions.ts";
 import { config } from "../config.ts";
 import { db } from "../db/database.ts";
+import type { UserRow } from "../db/schema.ts";
 import { HttpError, notFound } from "../http/errors.ts";
 import { workQueue } from "../jobs/queue.ts";
 import { endLiveSession } from "../live/control.ts";
@@ -41,13 +42,40 @@ async function logAction(
     .execute();
 }
 
+/** Users whose records the staff training account may see. */
+const sampleUsers = () => db.selectFrom("users").select("id").where("is_sample", "=", true);
+
+/**
+ * The staff training account is a sample itself: everything it sees and
+ * changes is limited to sample customers, their sessions and sample requests.
+ */
+function isTraining(staff: UserRow): boolean {
+  return staff.is_sample;
+}
+
 export async function staffRoutes(app: FastifyInstance): Promise<void> {
   app.get("/api/staff/overview", async (request) => {
-    await requireStaff(request);
+    const training = isTraining(await requireStaff(request));
+    let liveQuery = db.selectFrom("live_sessions").select("id").where("ended_at", "is", null);
+    if (training) liveQuery = liveQuery.where("owner_id", "in", sampleUsers());
+    let requestsQuery = db
+      .selectFrom("contact_requests")
+      .select((eb) => eb.fn.countAll<number>().as("n"))
+      .where("handled_at", "is", null);
+    if (training) requestsQuery = requestsQuery.where("is_sample", "=", true);
+    let responsesQuery = db
+      .selectFrom("responses")
+      .select((eb) => eb.fn.countAll<number>().as("n"))
+      .where("created_at", ">=", sql<Date>`date_trunc('day', now() at time zone 'Africa/Nairobi') at time zone 'Africa/Nairobi'`);
+    if (training) {
+      responsesQuery = responsesQuery.where("session_id", "in", db.selectFrom("live_sessions").select("id").where("owner_id", "in", sampleUsers()));
+    }
+    const onlySamples = training ? sql`and is_sample` : sql``;
     const [live, accounts, requests, responses, byDay] = await Promise.all([
-      db.selectFrom("live_sessions").select("id").where("ended_at", "is", null).execute(),
+      liveQuery.execute(),
       db
         .selectFrom("users")
+        .$if(training, (qb) => qb.where("is_sample", "=", true))
         .select([
           sql<number>`count(*) filter (where not is_guest and role = 'customer')`.as("accounts"),
           sql<number>`count(*) filter (where created_at >= date_trunc('day', now() at time zone 'Africa/Nairobi') at time zone 'Africa/Nairobi' and not is_guest and role = 'customer')`.as("today"),
@@ -55,20 +83,12 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
           sql<number>`count(*) filter (where plan <> 'free' and role = 'customer')`.as("paying"),
         ])
         .executeTakeFirstOrThrow(),
-      db
-        .selectFrom("contact_requests")
-        .select((eb) => eb.fn.countAll<number>().as("n"))
-        .where("handled_at", "is", null)
-        .executeTakeFirstOrThrow(),
-      db
-        .selectFrom("responses")
-        .select((eb) => eb.fn.countAll<number>().as("n"))
-        .where("created_at", ">=", sql<Date>`date_trunc('day', now() at time zone 'Africa/Nairobi') at time zone 'Africa/Nairobi'`)
-        .executeTakeFirstOrThrow(),
+      requestsQuery.executeTakeFirstOrThrow(),
+      responsesQuery.executeTakeFirstOrThrow(),
       sql<{ day: string; count: number }>`
         select to_char(d, 'YYYY-MM-DD') as day,
                (select count(*) from users
-                 where not is_guest and role = 'customer'
+                 where not is_guest and role = 'customer' ${onlySamples}
                    and (created_at at time zone 'Africa/Nairobi')::date = d) as count
           from generate_series((now() at time zone 'Africa/Nairobi')::date - 13,
                                (now() at time zone 'Africa/Nairobi')::date, interval '1 day') as d
@@ -90,12 +110,13 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.get<{ Querystring: { q?: string; plan?: string; page?: string } }>("/api/staff/customers", async (request) => {
-    await requireStaff(request);
+    const training = isTraining(await requireStaff(request));
     const page = Math.max(1, Number(request.query.page) || 1);
     const q = (request.query.q ?? "").trim().slice(0, 80);
     const plan = request.query.plan ?? "all";
 
     let base = db.selectFrom("users").where("role", "=", "customer");
+    if (training) base = base.where("is_sample", "=", true);
     if (q) {
       const like = `%${q.replace(/[%_\\]/g, (c) => `\\${c}`)}%`;
       base = base.where((eb) =>
@@ -153,13 +174,14 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.get<{ Params: { id: string } }>("/api/staff/customers/:id", async (request) => {
-    await requireStaff(request);
+    const training = isTraining(await requireStaff(request));
     if (!UUID.test(request.params.id)) throw notFound("That customer");
     const row = await db
       .selectFrom("users")
       .selectAll()
       .where("id", "=", request.params.id)
       .where("role", "=", "customer")
+      .$if(training, (qb) => qb.where("is_sample", "=", true))
       .executeTakeFirst();
     if (!row) throw notFound("That customer");
     const [presentations, sessions, actions] = await Promise.all([
@@ -246,6 +268,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
       .select(["id", "plan", "trial_ends_at", "is_guest"])
       .where("id", "=", request.params.id)
       .where("role", "=", "customer")
+      .$if(isTraining(staff), (qb) => qb.where("is_sample", "=", true))
       .executeTakeFirst();
     if (!row) throw notFound("That customer");
     if (row.plan !== "free") throw new HttpError(409, "paid", "This customer is on a paid plan.");
@@ -267,6 +290,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
         .set({ suspended_at: suspended ? new Date() : null })
         .where("id", "=", request.params.id)
         .where("role", "=", "customer")
+        .$if(isTraining(staff), (qb) => qb.where("is_sample", "=", true))
         .returning("id")
         .executeTakeFirst();
       if (!row) throw notFound("That customer");
@@ -286,7 +310,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
   );
 
   app.get("/api/staff/sessions", async (request) => {
-    await requireStaff(request);
+    const training = isTraining(await requireStaff(request));
     const rows = await db
       .selectFrom("live_sessions")
       .innerJoin("users", "users.id", "live_sessions.owner_id")
@@ -311,6 +335,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
             .as("responses"),
       ])
       .where("live_sessions.ended_at", "is", null)
+      .$if(training, (qb) => qb.where("users.is_sample", "=", true))
       .orderBy("live_sessions.started_at", "desc")
       .limit(100)
       .execute();
@@ -337,6 +362,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
       .selectFrom("live_sessions")
       .select(["id", "owner_id", "title"])
       .where("id", "=", request.params.id)
+      .$if(isTraining(staff), (qb) => qb.where("owner_id", "in", sampleUsers()))
       .executeTakeFirst();
     if (!session) throw notFound("That session");
     await endLiveSession(session.id);
@@ -345,7 +371,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
   });
 
   app.get<{ Querystring: { status?: string } }>("/api/staff/requests", async (request) => {
-    await requireStaff(request);
+    const training = isTraining(await requireStaff(request));
     let query = db
       .selectFrom("contact_requests")
       .leftJoin("users as handler", "handler.id", "contact_requests.handled_by")
@@ -353,6 +379,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
       .select("handler.name as handler_name")
       .orderBy("contact_requests.created_at", "desc")
       .limit(100);
+    if (training) query = query.where("contact_requests.is_sample", "=", true);
     if (request.query.status === "open") query = query.where("contact_requests.handled_at", "is", null);
     if (request.query.status === "handled") query = query.where("contact_requests.handled_at", "is not", null);
     const rows = await query.execute();
@@ -380,6 +407,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
         .updateTable("contact_requests")
         .set({ handled_at: handled ? new Date() : null, handled_by: handled ? staff.id : null })
         .where("id", "=", request.params.id)
+        .$if(isTraining(staff), (qb) => qb.where("is_sample", "=", true))
         .returning("id")
         .executeTakeFirst();
       if (!row) throw notFound("That request");
