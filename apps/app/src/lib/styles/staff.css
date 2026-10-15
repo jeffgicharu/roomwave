@@ -1,0 +1,83 @@
+/* Shared by the staff screens. */
+.staff-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px 24px;
+  margin-bottom: 24px;
+}
+
+.staff-head h1 {
+  font-size: var(--step-3);
+}
+
+.staff-head p {
+  margin-top: 6px;
+  color: var(--ink-3);
+}
+
+.staff-panel {
+  padding: 20px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-l);
+  background: var(--card);
+}
+
+.staff-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-m);
+  background: var(--card);
+}
+
+.staff-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+}
+
+.staff-table th {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-align: left;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.staff-table td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+
+.staff-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.staff-table td.num,
+.staff-table th.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.staff-table tbody tr:hover {
+  background: var(--paper);
+}
+
+.staff-sub {
+  display: block;
+  font-size: 0.82rem;
+  color: var(--ink-3);
+}
+
+.staff-empty {
+  padding: 40px 20px;
+  text-align: center;
+  color: var(--ink-3);
+}

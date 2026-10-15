@@ -1,0 +1,72 @@
+---
+import ContactForm from "../components/ContactForm.svelte";
+import PageHero from "../components/PageHero.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Contact us" description="Ask about the Organisation plan, pay for Pro by invoice, get a price for an event, or get help with your account." path="/contact">
+  <PageHero eyebrow="Contact" title="Talk to the people who build Roomwave." lead="For plans, invoices, events or help with your account. We are in Nairobi, and we usually reply within one working day." />
+  <section class="section-tight">
+    <div class="container grid">
+      <div class="form-card">
+        <ContactForm client:load />
+      </div>
+      <aside class="aside">
+        <div>
+          <h2>Running an event?</h2>
+          <p>Tell us the date, the venue and roughly how many people. We will suggest a plan and help you test the room beforehand.</p>
+        </div>
+        <div>
+          <h2>Paying by invoice</h2>
+          <p>Choose “Paying for Pro by invoice” and give the email on your account. Most teams pay by bank transfer or M-Pesa paybill.</p>
+        </div>
+        <div>
+          <h2>Joining a session?</h2>
+          <p>You don't need to contact us. Enter the code from the screen at <a href="/join">the join page</a>.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.8fr);
+    gap: clamp(28px, 4vw, 64px);
+    align-items: start;
+  }
+
+  .form-card {
+    padding: clamp(22px, 3vw, 36px);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--card);
+    box-shadow: var(--shadow-1);
+  }
+
+  .aside {
+    display: grid;
+    gap: 28px;
+  }
+
+  .aside h2 {
+    font-size: 1.2rem;
+  }
+
+  .aside p {
+    margin-top: 6px;
+    color: var(--ink-2);
+  }
+
+  .aside a {
+    color: var(--signal-strong);
+    font-weight: 600;
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

@@ -1,0 +1,89 @@
+---
+import { Image } from "astro:assets";
+
+import PageHero from "../../components/PageHero.astro";
+import { USE_CASES } from "../../data/use-cases.ts";
+import Base from "../../layouts/Base.astro";
+---
+
+<Base title="Use cases" description="How conferences, lecture halls, churches and company town halls use Roomwave for live polls, quizzes and audience questions." path="/use-cases">
+  <PageHero eyebrow="Use cases" title="Every room has more to say than you hear." lead="Roomwave works anywhere people gather to listen: here is how four kinds of room use it." />
+  <section class="section-tight">
+    <div class="container">
+      <ul class="list">
+        {
+          USE_CASES.map((item) => (
+            <li>
+              <a href={`/use-cases/${item.slug}`}>
+                <div class="photo-frame">
+                  <Image src={item.image} alt={item.alt} widths={[480, 800, 1200]} sizes="(min-width: 900px) 50vw, 100vw" format="webp" />
+                </div>
+                <div class="text">
+                  <p class="eyebrow">{item.name}</p>
+                  <h2 class="h3">{item.title}</h2>
+                  <p>{item.lead}</p>
+                  <span class="more">How it works →</span>
+                </div>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .list {
+    display: grid;
+    gap: clamp(32px, 5vw, 64px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .list a {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(24px, 4vw, 56px);
+    text-decoration: none;
+  }
+
+  .list li:nth-child(even) .text {
+    order: -1;
+  }
+
+  .photo-frame {
+    aspect-ratio: 3 / 2;
+  }
+
+  .text {
+    display: grid;
+    gap: 12px;
+  }
+
+  .text p:not(.eyebrow) {
+    color: var(--ink-2);
+  }
+
+  .more {
+    font-weight: 700;
+    color: var(--signal-strong);
+  }
+
+  .list a:hover h2 {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  @media (max-width: 820px) {
+    .list a {
+      grid-template-columns: 1fr;
+    }
+
+    .list li:nth-child(even) .text {
+      order: 0;
+    }
+  }
+</style>

@@ -1,0 +1,13 @@
+packages:
+  - apps/*
+  - packages/*
+
+onlyBuiltDependencies:
+  - esbuild
+
+# Optional native speed-ups. The production server's processor cannot run
+# them, so they are never built anywhere and the pure JavaScript paths are used.
+ignoredBuiltDependencies:
+  - msgpackr-extract
+  - bufferutil
+  - utf-8-validate

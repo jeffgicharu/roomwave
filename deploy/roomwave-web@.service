@@ -1,0 +1,35 @@
+[Unit]
+Description=Roomwave web and live server, port %i
+After=network.target postgresql.service redis-server.service
+ConditionPathExists=/var/www/roomwave.jeffgicharu.com/slots/%i/server/dist/web.mjs
+
+[Service]
+User=roomwave
+Group=roomwave
+WorkingDirectory=/var/www/roomwave.jeffgicharu.com/slots/%i/server
+EnvironmentFile=/var/www/roomwave.jeffgicharu.com/shared/env
+Environment=NODE_ENV=production
+# Local connections only. nginx is the only way in from outside.
+Environment=HOST=127.0.0.1
+Environment=PORT=%i
+Environment=DATABASE_APP_NAME=roomwave-web-%i
+# Two slots run side by side during a release; with the worker's 4 that stays within 20.
+Environment=DATABASE_POOL=8
+Environment=MEMORY_LIMIT_MB=220
+ExecStart=/var/www/roomwave.jeffgicharu.com/runtime/node/bin/node --max-old-space-size=150 dist/web.mjs
+Restart=on-failure
+RestartSec=3
+# On SIGTERM the server closes every phone's connection so it reconnects to the live slot.
+KillSignal=SIGTERM
+SuccessExitStatus=143
+TimeoutStopSec=20
+# A leak gets this process restarted; it must never push the server into swap.
+MemoryMax=220M
+MemorySwapMax=0
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

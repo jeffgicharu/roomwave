@@ -1,0 +1,271 @@
+---
+import { NAV } from "../site.ts";
+import Wordmark from "./Wordmark.astro";
+
+interface Props {
+  dark?: boolean;
+}
+const { dark = false } = Astro.props;
+const current = Astro.url.pathname.replace(/\/$/, "") || "/";
+---
+
+<header class:list={["site-header", { dark }]}>
+  <div class="container bar">
+    <a href="/" class="brand" aria-label="Roomwave home"><Wordmark tone={dark ? "paper" : "ink"} /></a>
+
+    <nav class="links" aria-label="Main">
+      {
+        NAV.map((item) => (
+          <a href={item.href} aria-current={current.startsWith(item.href) ? "page" : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+    </nav>
+
+    <div class="actions">
+      <form class="join" action="/join" method="get" role="search" aria-label="Join a session">
+        <label class="visually-hidden" for="header-code">Session code</label>
+        <input id="header-code" name="code" inputmode="numeric" autocomplete="off" maxlength="7" placeholder="Enter code" />
+        <button type="submit">Join</button>
+      </form>
+      <a class="signin" href="/signin">Sign in</a>
+      <a class="btn btn-signal btn-small try" href="/try">Try it free</a>
+    </div>
+
+    <details class="mobile">
+      <summary aria-label="Menu">
+        <span class="bars" aria-hidden="true"><span></span><span></span><span></span></span>
+      </summary>
+      <div class="sheet">
+        <nav aria-label="Main">
+          {NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+          <a href="/join">Join a session</a>
+          <a href="/signin">Sign in</a>
+        </nav>
+        <a class="btn btn-signal btn-block" href="/try">Try it free, no sign-up</a>
+      </div>
+    </details>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 40;
+    background: rgb(251 247 240 / 0.86);
+    backdrop-filter: saturate(1.4) blur(14px);
+    border-bottom: 1px solid rgb(29 20 48 / 0.07);
+  }
+
+  .site-header.dark {
+    background: rgb(22 15 36 / 0.82);
+    border-bottom-color: rgb(255 255 255 / 0.07);
+    color: var(--stage-text);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    min-height: 68px;
+  }
+
+  .brand {
+    flex: none;
+    text-decoration: none;
+  }
+
+  .links {
+    display: flex;
+    gap: 2px;
+  }
+
+  .links a {
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 500;
+    color: var(--ink-2);
+    text-decoration: none;
+  }
+
+  .dark .links a {
+    color: var(--stage-muted);
+  }
+
+  .links a:hover,
+  .links a[aria-current="page"] {
+    background: rgb(29 20 48 / 0.06);
+    color: var(--ink);
+  }
+
+  .dark .links a:hover,
+  .dark .links a[aria-current="page"] {
+    background: rgb(255 255 255 / 0.08);
+    color: var(--stage-text);
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+  }
+
+  .join {
+    display: flex;
+    align-items: center;
+    height: 38px;
+    border: 1.5px solid var(--line-strong);
+    border-radius: 999px;
+    background: var(--card);
+    overflow: hidden;
+  }
+
+  .dark .join {
+    border-color: var(--stage-line);
+    background: var(--stage-2);
+  }
+
+  .join input {
+    width: 112px;
+    height: 100%;
+    padding: 0 6px 0 14px;
+    border: 0;
+    background: transparent;
+    font-size: 0.92rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+  }
+
+  .join input:focus {
+    outline: none;
+  }
+
+  .join:focus-within {
+    border-color: var(--ink);
+  }
+
+  .join button {
+    height: 100%;
+    padding: 0 14px;
+    border: 0;
+    border-left: 1.5px solid var(--line);
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .dark .join button {
+    border-left-color: var(--stage-line);
+    color: var(--stage-text);
+  }
+
+  .join button:hover {
+    background: var(--paper-2);
+  }
+
+  .dark .join button:hover {
+    background: var(--stage-3);
+  }
+
+  .signin {
+    font-weight: 600;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .signin:hover {
+    text-decoration: underline;
+  }
+
+  .mobile {
+    display: none;
+    margin-left: auto;
+  }
+
+  summary {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .bars {
+    display: grid;
+    gap: 5px;
+  }
+
+  .bars span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    border-radius: 2px;
+    background: currentColor;
+    transition: transform 200ms ease, opacity 200ms ease;
+  }
+
+  details[open] .bars span:nth-child(1) {
+    transform: translateY(7px) rotate(45deg);
+  }
+
+  details[open] .bars span:nth-child(2) {
+    opacity: 0;
+  }
+
+  details[open] .bars span:nth-child(3) {
+    transform: translateY(-7px) rotate(-45deg);
+  }
+
+  .sheet {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 100%;
+    display: grid;
+    gap: 16px;
+    padding: 12px var(--gutter) 24px;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    box-shadow: var(--shadow-3);
+    color: var(--ink);
+  }
+
+  .sheet nav {
+    display: grid;
+  }
+
+  .sheet nav a {
+    padding: 14px 4px;
+    border-bottom: 1px solid var(--line);
+    font-size: 1.1rem;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  @media (max-width: 1120px) {
+    .join {
+      display: none;
+    }
+  }
+
+  @media (max-width: 900px) {
+    .links,
+    .actions {
+      display: none;
+    }
+
+    .mobile {
+      display: block;
+    }
+  }
+</style>

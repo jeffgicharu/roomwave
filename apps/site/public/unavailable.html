@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Back in a moment · Roomwave</title>
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      html, body { margin: 0; min-height: 100%; }
+      body {
+        display: grid;
+        place-items: center;
+        min-height: 100vh;
+        padding: 24px;
+        background: #160f24 radial-gradient(70% 50% at 50% 0%, rgba(255, 122, 61, 0.25), transparent 70%);
+        color: #f7f1e8;
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+        text-align: center;
+      }
+      main { display: grid; justify-items: center; gap: 18px; max-width: 460px; }
+      svg rect { transform-box: fill-box; transform-origin: 50% 100%; animation: rise 1.4s ease-out infinite alternate; }
+      svg rect:nth-child(2) { animation-delay: -0.3s; }
+      svg rect:nth-child(3) { animation-delay: -0.6s; }
+      svg rect:nth-child(4) { animation-delay: -0.9s; }
+      svg rect:nth-child(5) { animation-delay: -1.2s; }
+      @keyframes rise { from { transform: scaleY(0.45); } to { transform: scaleY(1); } }
+      h1 { margin: 0; font-size: 2rem; line-height: 1.1; letter-spacing: -0.02em; }
+      p { margin: 0; color: #b4a9c4; line-height: 1.5; }
+      a { color: #ff7a3d; font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <svg viewBox="0 0 33 24" width="66" height="48" aria-hidden="true">
+        <rect x="0" y="15" width="5" height="9" rx="2.5" fill="#ff6a2b" />
+        <rect x="7" y="9" width="5" height="15" rx="2.5" fill="#ff6a2b" />
+        <rect x="14" y="2" width="5" height="22" rx="2.5" fill="#ff6a2b" />
+        <rect x="21" y="9" width="5" height="15" rx="2.5" fill="#ff6a2b" />
+        <rect x="28" y="0" width="5" height="24" rx="2.5" fill="#ff6a2b" />
+      </svg>
+      <h1>Roomwave is back in a moment.</h1>
+      <p>We are making a quick change. Answers already sent are saved, and phones in a session reconnect by themselves.</p>
+      <p><a href="/">Try again</a></p>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,43 @@
+---
+interface Props {
+  tone?: "ink" | "paper";
+  size?: number;
+}
+const { tone = "ink", size = 23 } = Astro.props;
+const bars = [
+  [0, 9],
+  [7, 15],
+  [14, 22],
+  [21, 15],
+  [28, 24],
+];
+---
+
+<span class:list={["wordmark", tone]} style={`--size:${size}px`}>
+  <svg viewBox="0 0 33 24" width={Math.round(size * 0.86 * (33 / 24))} height={Math.round(size * 0.86)} aria-hidden="true">
+    {bars.map(([x, h]) => <rect x={x} y={24 - h!} width="5" height={h} rx="2.5" fill="#ff6a2b" />)}
+  </svg>
+  <span>roomwave</span>
+</span>
+
+<style>
+  .wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: calc(var(--size) * 0.36);
+    font-family: var(--font-display);
+    font-size: var(--size);
+    font-weight: 700;
+    letter-spacing: -0.04em;
+    line-height: 1;
+    color: var(--ink);
+  }
+
+  .wordmark.paper {
+    color: var(--paper);
+  }
+
+  .wordmark span {
+    transform: translateY(-0.04em);
+  }
+</style>

@@ -1,0 +1,6 @@
+pnpm-lock.yaml
+dist
+build
+.svelte-kit
+.astro
+node_modules

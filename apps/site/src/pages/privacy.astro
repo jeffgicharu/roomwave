@@ -1,0 +1,53 @@
+---
+import PageHero from "../components/PageHero.astro";
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Privacy" description="What Roomwave keeps about presenters and audiences, why, for how long, and how to have it deleted." path="/privacy">
+  <PageHero eyebrow="Privacy" title="What we keep, and why." lead="Last updated 15 October 2026." />
+  <section class="section-tight">
+    <div class="container prose">
+      <h2>If you answer in a session</h2>
+      <p>
+        You do not need an account and we do not ask who you are. Your phone gets a random identifier for that session, kept in your browser, so that you are counted once and can
+        reconnect. We keep your answers, any question you send, and any name you choose to add. The presenter sees them, and may download them.
+      </p>
+      <p>Answers are anonymous unless you add a name. Quiz nicknames are made up for you and can be changed.</p>
+
+      <h2>If you present</h2>
+      <p>
+        We keep your name, your email address and your password (stored only as a one-way hash), the presentations you make, and the answers given in your sessions. We use your
+        email to sign you in, to reset your password and to send the reports you ask for. We do not send marketing email.
+      </p>
+      <p>If you try Roomwave without an account, your guest workspace and everything in it is deleted after a day unless you save it as an account.</p>
+
+      <h2>Cookies and storage</h2>
+      <p>
+        We use one cookie, to keep you signed in. Phones that join a session keep a small identifier in the browser. We do not use advertising or tracking cookies, and there are no
+        third-party analytics on Roomwave.
+      </p>
+
+      <h2>Who else handles it</h2>
+      <ul>
+        <li><strong>Cloudflare</strong> carries traffic to our servers and protects them from attacks.</li>
+        <li><strong>Resend</strong> delivers the emails you ask for: password links and reports.</li>
+      </ul>
+      <p>We never sell data, and we do not share it with anyone else unless the law requires it.</p>
+
+      <h2>How long we keep it</h2>
+      <ul>
+        <li>Presentations and session results: until you delete them or your account.</li>
+        <li>Guest workspaces: one day.</li>
+        <li>PDF reports: kept for 14 days, then drawn again when you next ask for one.</li>
+        <li>Password links: one hour, used once.</li>
+      </ul>
+
+      <h2>Your choices</h2>
+      <p>
+        You can change your details or delete your account from <strong>Account</strong> at any time. Deleting your account deletes your presentations and every session's results
+        straight away. To ask about your data, write to us from the <a href="/contact?topic=support">contact page</a>.
+      </p>
+      <p>We handle personal data in line with Kenya's Data Protection Act, 2019.</p>
+    </div>
+  </section>
+</Base>

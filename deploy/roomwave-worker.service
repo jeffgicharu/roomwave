@@ -1,0 +1,30 @@
+[Unit]
+Description=Roomwave background worker
+After=network.target postgresql.service redis-server.service
+ConditionPathExists=/var/www/roomwave.jeffgicharu.com/current/server/dist/worker.mjs
+
+[Service]
+User=roomwave
+Group=roomwave
+WorkingDirectory=/var/www/roomwave.jeffgicharu.com/current/server
+EnvironmentFile=/var/www/roomwave.jeffgicharu.com/shared/env
+Environment=NODE_ENV=production
+Environment=DATABASE_APP_NAME=roomwave-worker
+Environment=DATABASE_POOL=4
+Environment=WORKER_HEALTH_PORT=8302
+Environment=MEMORY_LIMIT_MB=130
+ExecStart=/var/www/roomwave.jeffgicharu.com/runtime/node/bin/node --max-old-space-size=90 dist/worker.mjs
+Restart=on-failure
+RestartSec=5
+KillSignal=SIGTERM
+SuccessExitStatus=143
+TimeoutStopSec=30
+MemoryMax=130M
+MemorySwapMax=0
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=full
+
+[Install]
+WantedBy=multi-user.target

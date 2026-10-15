@@ -1,0 +1,88 @@
+/* Roomwave design tokens. One source for the marketing site and the app. */
+
+@import "@fontsource-variable/bricolage-grotesque/wght.css";
+@import "@fontsource-variable/instrument-sans/wght.css";
+
+:root {
+  /* Paper: the handout, the phone in your hand. */
+  --paper: #fbf7f0;
+  --paper-2: #f4ede1;
+  --paper-3: #ebe2d3;
+  --card: #ffffff;
+  --line: #e6dccd;
+  --line-strong: #d4c7b3;
+
+  /* Ink: a deep aubergine instead of black. */
+  --ink: #1d1430;
+  --ink-2: #463b57;
+  --ink-3: #6b6079;
+  --ink-4: #9a90a6;
+
+  /* Stage: the dimmed hall and the big screen. */
+  --stage: #160f24;
+  --stage-2: #221a33;
+  --stage-3: #2f2543;
+  --stage-line: #3b3052;
+  --stage-text: #f7f1e8;
+  --stage-muted: #b4a9c4;
+
+  /* Accents. Signal orange is the brand; the rest are for charts and states. */
+  --signal: #ff6a2b;
+  --signal-strong: #c4410c; /* readable as text on paper */
+  --signal-soft: #ffe2d3;
+  --sun: #ffc23d;
+  --sun-soft: #fff1cc;
+  --lagoon: #14a098;
+  --lagoon-strong: #0b6f69;
+  --lagoon-soft: #d4f1ee;
+  --iris: #6b5cff;
+  --rose: #e8457c;
+  --sky: #2f8fe0;
+
+  --danger: #c22f2f;
+  --danger-soft: #fde6e4;
+  --success: #17805a;
+  --success-soft: #def5ea;
+
+  /* Type */
+  --font-display: "Bricolage Grotesque Variable", "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-text: "Instrument Sans Variable", "Instrument Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --step--1: clamp(0.83rem, 0.8rem + 0.12vw, 0.9rem);
+  --step-0: clamp(1rem, 0.96rem + 0.18vw, 1.08rem);
+  --step-1: clamp(1.18rem, 1.1rem + 0.35vw, 1.35rem);
+  --step-2: clamp(1.4rem, 1.25rem + 0.7vw, 1.8rem);
+  --step-3: clamp(1.75rem, 1.45rem + 1.4vw, 2.6rem);
+  --step-4: clamp(2.2rem, 1.6rem + 2.8vw, 4rem);
+  --step-5: clamp(2.8rem, 1.7rem + 5vw, 6.4rem);
+
+  /* Space */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+  --space-8: 4.5rem;
+  --space-9: 7rem;
+
+  --radius-s: 8px;
+  --radius-m: 14px;
+  --radius-l: 22px;
+  --radius-xl: 32px;
+  --radius-pill: 999px;
+
+  --shadow-1: 0 1px 2px rgb(29 20 48 / 0.06), 0 1px 1px rgb(29 20 48 / 0.04);
+  --shadow-2: 0 2px 6px rgb(29 20 48 / 0.06), 0 10px 24px -6px rgb(29 20 48 / 0.12);
+  --shadow-3: 0 4px 10px rgb(29 20 48 / 0.06), 0 28px 60px -16px rgb(29 20 48 / 0.28);
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-spring: cubic-bezier(0.34, 1.42, 0.64, 1);
+
+  --content: 1200px;
+  --gutter: clamp(16px, 4vw, 40px);
+
+  /* Grain: a light paper texture, drawn rather than downloaded. */
+  --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.11 0 0 0 0 0.08 0 0 0 0 0.19 0 0 0 0.09 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}

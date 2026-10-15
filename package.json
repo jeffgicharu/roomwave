@@ -1,0 +1,36 @@
+{
+  "name": "roomwave",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.28.0",
+  "engines": {
+    "node": ">=24.21.0"
+  },
+  "scripts": {
+    "dev:server": "pnpm --filter @roomwave/server dev",
+    "dev:worker": "pnpm --filter @roomwave/server dev:worker",
+    "dev:app": "pnpm --filter @roomwave/app dev",
+    "dev:site": "pnpm --filter @roomwave/site dev",
+    "build": "pnpm -r build",
+    "typecheck": "pnpm -r typecheck",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm -r test",
+    "migrate": "pnpm --filter @roomwave/server migrate",
+    "seed": "pnpm --filter @roomwave/server seed",
+    "release": "node scripts/assemble-release.mjs"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "eslint": "^10.12.0",
+    "eslint-plugin-svelte": "^3.23.1",
+    "globals": "^17.13.0",
+    "prettier": "^3.9.10",
+    "prettier-plugin-astro": "^1.1.1",
+    "prettier-plugin-svelte": "^4.1.1",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.71.2",
+    "vitest": "^5.0.5"
+  }
+}

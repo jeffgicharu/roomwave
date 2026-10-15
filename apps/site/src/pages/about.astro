@@ -1,0 +1,118 @@
+---
+import { Image } from "astro:assets";
+
+import cityDusk from "../assets/photos/city-dusk.jpg";
+import applause from "../assets/photos/team-applause.jpg";
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="About" description="Roomwave is made in Nairobi for the rooms East Africa actually presents in: crowded halls, patchy Wi-Fi and a hundred different phones." path="/about">
+  <section class="hero stage-band">
+    <div class="container hero-inner">
+      <p class="eyebrow">About Roomwave</p>
+      <h1 class="display">Made in Nairobi, for the rooms we present in.</h1>
+    </div>
+    <div class="container">
+      <div class="photo-frame wide">
+        <Image src={cityDusk} alt="An East African city skyline at dusk, seen from a rooftop" widths={[800, 1300, 2000]} sizes="(min-width: 1280px) 1200px, 100vw" format="webp" loading="eager" fetchpriority="high" />
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container story">
+      <div class="prose">
+        <p class="opening">Roomwave started at a town hall where three people asked every question and three hundred said nothing.</p>
+        <p>
+          Afterwards, in the corridor, everyone had something to say. The questions were good ones. They had simply never been asked in the room, because nobody wanted to stand up
+          in front of their manager, and the microphone took five minutes to reach the back.
+        </p>
+        <p>
+          The tools for this existed, but they were built for fast office networks and new phones. In the halls we know, the Wi-Fi gives out at forty people, half the audience is on
+          mobile data, and the phones range from this year's flagship to a five-year-old Android with a cracked screen.
+        </p>
+        <p>
+          So we built Roomwave for that room. The page a phone opens is small. It reconnects by itself when the signal drops, and it finds another way through when a venue's network
+          blocks it. It costs nothing for the audience and needs no account, because the people in the room should not have to sign up for anything to be heard.
+        </p>
+        <h2>What we care about</h2>
+        <ul>
+          <li><strong>Every voice.</strong> The quiet majority, not just the confident few.</li>
+          <li><strong>Real rooms.</strong> We test in halls, on mobile data, with budget phones.</li>
+          <li><strong>Fair prices in shillings.</strong> Free for small rooms, invoices for organisations, no surprises.</li>
+          <li><strong>Privacy.</strong> Answers are anonymous unless someone chooses otherwise, and we never sell data.</li>
+        </ul>
+      </div>
+      <div class="side">
+        <div class="photo-frame tall">
+          <Image src={applause} alt="A team in a meeting room applauding a colleague" widths={[480, 800]} sizes="(min-width: 900px) 40vw, 100vw" format="webp" />
+        </div>
+        <a class="btn btn-signal btn-large" href="/try">Try it free</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    padding: clamp(56px, 8vw, 112px) 0 0;
+  }
+
+  .hero-inner {
+    display: grid;
+    gap: 18px;
+    padding-bottom: clamp(32px, 5vw, 56px);
+  }
+
+  .hero h1 {
+    max-width: 16ch;
+    font-size: clamp(2.6rem, 1.6rem + 4.4vw, 5.6rem);
+  }
+
+  .wide {
+    aspect-ratio: 21 / 9;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+  }
+
+  .story {
+    display: grid;
+    grid-template-columns: minmax(0, 1.3fr) minmax(0, 0.7fr);
+    gap: clamp(32px, 5vw, 80px);
+    align-items: start;
+  }
+
+  .opening {
+    font-family: var(--font-display);
+    font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.4rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.025em;
+  }
+
+  .side {
+    position: sticky;
+    top: 100px;
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+  }
+
+  .tall {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+  }
+
+  @media (max-width: 900px) {
+    .story {
+      grid-template-columns: 1fr;
+    }
+
+    .side {
+      position: static;
+    }
+
+    .wide {
+      aspect-ratio: 4 / 3;
+    }
+  }
+</style>

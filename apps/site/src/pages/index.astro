@@ -1,0 +1,802 @@
+---
+import { getImage, Image } from "astro:assets";
+
+import { PLANS, formatShillings } from "@roomwave/shared";
+import SampleStage from "@roomwave/ui/components/SampleStage.svelte";
+
+import communityHall from "../assets/photos/community-hall.jpg";
+import hall from "../assets/photos/hall-audience-wide.jpg";
+import lectureTheatre from "../assets/photos/lecture-theatre.jpg";
+import panel from "../assets/photos/panel-discussion.jpg";
+import phone from "../assets/photos/phone-in-hand.jpg";
+import townHall from "../assets/photos/town-hall.jpg";
+import hallMask from "../assets/overlay/hall-audience-wide-mask.png";
+import phoneMask from "../assets/overlay/phone-in-hand-mask.png";
+import HomePoll from "../components/HomePoll.svelte";
+import PhotoScreen from "../components/PhotoScreen.svelte";
+import overlays from "../data/overlays.json";
+import Base from "../layouts/Base.astro";
+import { SITE } from "../site.ts";
+
+const hallImage = await getImage({ src: hall, widths: [640, 960, 1280, 1600, 2000], format: "webp" });
+const phoneImage = await getImage({ src: phone, widths: [480, 720, 960, 1280], format: "webp" });
+
+const faqs = [
+  {
+    q: "Does my audience need to install anything?",
+    a: "No. They open the camera, scan the code on the screen, and answer in the browser they already have. No app and no account.",
+  },
+  {
+    q: "What if the Wi-Fi in the hall is weak?",
+    a: "The page a phone loads to join is tiny, and if the connection drops it reconnects by itself without losing the answer. Where a venue's network blocks live connections, Roomwave falls back to ordinary requests automatically.",
+  },
+  {
+    q: "Are answers anonymous?",
+    a: "Yes, unless someone chooses to add their name. Quizzes give everyone a friendly nickname for the leaderboard, which they can change.",
+  },
+  {
+    q: "Can I keep the results?",
+    a: "Every answer is saved. Download a spreadsheet of any session, or on Pro a PDF report, emailed to you if you like.",
+  },
+  {
+    q: "How do I pay?",
+    a: "Free stays free. Pro starts with a 14-day trial with no card, and teams pay by invoice, by bank transfer or M-Pesa paybill.",
+  },
+];
+
+const faqData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+};
+
+const product = {
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  name: "Roomwave",
+  applicationCategory: "BusinessApplication",
+  operatingSystem: "Any (web browser)",
+  url: SITE.url,
+  description: SITE.description,
+  offers: [
+    { "@type": "Offer", name: "Free", price: "0", priceCurrency: "KES" },
+    { "@type": "Offer", name: "Pro", price: String(PLANS.pro.monthly), priceCurrency: "KES" },
+  ],
+};
+
+const useCases = [
+  { href: "/use-cases/conferences", title: "Conferences and panels", body: "Moderated Q&A with upvotes, so the panel takes the questions the room actually wants.", image: panel, alt: "A panel of four speakers on a conference stage, seen from the audience" },
+  { href: "/use-cases/education", title: "Lecture halls", body: "Check understanding before students leave, and find out which part to teach again.", image: lectureTheatre, alt: "Students on tiered wooden benches in a lecture theatre" },
+  { href: "/use-cases/faith-and-community", title: "Churches and community halls", body: "Quizzes that get the whole hall laughing, and feedback from people who never raise a hand.", image: communityHall, alt: "A community hall full of people of all ages, laughing at something at the front" },
+  { href: "/use-cases/workplace", title: "Company town halls", body: "Honest pulse checks and questions for leadership, without anyone having to stand up.", image: townHall, alt: "Employees gathered for a town hall in a bright open-plan office" },
+];
+---
+
+<Base
+  title="Live polls, quizzes and Q&A for any room"
+  description={SITE.description}
+  path="/"
+  structuredData={[product, faqData]}
+>
+  <section class="hero">
+    <div class="container hero-grid">
+      <div class="hero-copy">
+        <p class="eyebrow hero-eyebrow">Live polls · word clouds · quizzes · Q&amp;A</p>
+        <h1 class="display">Every voice in the <span class="swash">room.</span></h1>
+        <p class="lead">
+          Put a question on the big screen. Everyone answers on their phone, with no app and no sign-up, and the results
+          move as the answers arrive. Made in Nairobi for real rooms, from lecture halls to town halls.
+        </p>
+        <div class="cta">
+          <a class="btn btn-signal btn-large" href="/try">Try it free, no sign-up</a>
+          <a class="btn btn-ghost btn-large" href="#how-it-works">See how it works</a>
+        </div>
+        <p class="fine">Free for rooms of up to {PLANS.free.participants}. Works on any phone with a browser.</p>
+      </div>
+      <div class="hero-poll">
+        <HomePoll client:load />
+        <p class="poll-caption">This poll is live. Vote, and watch everyone else's answers arrive.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="photo-band" aria-label="Roomwave in a conference hall">
+    <div class="container">
+      <figure class="hall rise">
+        <PhotoScreen
+          client:visible
+          src={hallImage.src}
+          srcset={hallImage.srcSet.attribute}
+          sizes="(min-width: 1280px) 1200px, 100vw"
+          alt="A conference hall in Nairobi: the audience watches live poll results on the screen while the presenter speaks"
+          width={overlays["hall-audience-wide"].width}
+          height={overlays["hall-audience-wide"].height}
+          corners={overlays["hall-audience-wide"].corners as [number, number][]}
+          mask={hallMask.src}
+          kind="stage"
+        />
+        <figcaption>On the screen: answers from the room, counted as they arrive.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="section" id="how-it-works">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">How it works</p>
+        <h2 class="h2">Three steps, and the second one is theirs.</h2>
+      </div>
+      <ol class="steps">
+        <li class="rise">
+          <span class="num">1</span>
+          <h3 class="h3">Ask</h3>
+          <p>Write a question in a minute: a poll, a word cloud, a rating, a quiz or open Q&amp;A. Or start from a template.</p>
+        </li>
+        <li class="rise">
+          <span class="num">2</span>
+          <h3 class="h3">They answer</h3>
+          <p>People scan the code on the screen, or type the six digits, and answer on their own phones. No app, no account.</p>
+        </li>
+        <li class="rise">
+          <span class="num">3</span>
+          <h3 class="h3">The room sees itself</h3>
+          <p>Results move on the big screen the moment answers land. Everything is saved for you afterwards.</p>
+        </li>
+      </ol>
+      <div class="phone-row">
+        <figure class="phone-photo rise">
+          <PhotoScreen
+            client:visible
+            src={phoneImage.src}
+            srcset={phoneImage.srcSet.attribute}
+            sizes="(min-width: 900px) 460px, 100vw"
+            alt="A man in an audience holds his phone and answers a Roomwave poll"
+            width={overlays["phone-in-hand"].width}
+            height={overlays["phone-in-hand"].height}
+            corners={overlays["phone-in-hand"].corners as [number, number][]}
+            mask={phoneMask.src}
+            kind="phone"
+          />
+        </figure>
+        <div class="phone-copy">
+          <p class="eyebrow">For the audience</p>
+          <h3 class="h2">Answering takes a tap.</h3>
+          <p class="lead">
+            Big buttons, no forms, nothing to install. A phone that loses signal picks up where it left off, and nobody
+            is counted twice.
+          </p>
+          <ul class="ticks">
+            <li>Join by camera or with a six-digit code</li>
+            <li>Anonymous unless they add a name</li>
+            <li>Works on budget Android phones and older iPhones</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section stage-band" aria-labelledby="kinds">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Six kinds of slide</p>
+        <h2 class="h2" id="kinds">Everything a room can say, on one screen.</h2>
+        <p class="lead">Mix them in one presentation. Each one updates live, and each one is saved.</p>
+      </div>
+      <div class="kinds">
+        <figure class="kind wide rise">
+          <div class="screen"><SampleStage client:visible scenario="wordcloud" theme="ink" pace={600} /></div>
+          <figcaption><strong>Word clouds</strong> grow as answers repeat. Offensive words never reach the screen.</figcaption>
+        </figure>
+        <figure class="kind rise">
+          <div class="screen"><SampleStage client:visible scenario="qna" theme="lagoon" pace={900} /></div>
+          <figcaption><strong>Q&amp;A with upvotes</strong>, approved by you before it shows, if you like.</figcaption>
+        </figure>
+        <figure class="kind rise">
+          <div class="screen"><SampleStage client:visible scenario="scale" theme="sunrise" pace={500} /></div>
+          <figcaption><strong>Rating scales</strong> from 1 to 5, 7 or 10, with the average up front.</figcaption>
+        </figure>
+      </div>
+      <ul class="also">
+        <li><strong>Multiple choice</strong> one answer or many</li>
+        <li><strong>Timed quizzes</strong> with points for speed and a leaderboard</li>
+        <li><strong>Content slides</strong> for a heading, some words, a picture</li>
+      </ul>
+      <a class="btn btn-ghost on-dark" href="/features">See every feature</a>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="real-rooms">
+    <div class="container real">
+      <div class="section-head">
+        <p class="eyebrow">Built for real rooms</p>
+        <h2 class="h2" id="real-rooms">Made for the hall you actually present in.</h2>
+        <p class="lead">
+          Most halls have patchy Wi-Fi and a hundred different phones. Roomwave is built for that room, not for a showroom
+          on fast office internet.
+        </p>
+      </div>
+      <dl class="facts">
+        <div class="rise">
+          <dt>Light enough for slow data</dt>
+          <dd>The page a phone opens to answer is a fraction of the size of a typical website, so it opens quickly on a weak signal.</dd>
+        </div>
+        <div class="rise">
+          <dt>Survives a dropped signal</dt>
+          <dd>Phones reconnect by themselves and pick up the current question. An answer is never counted twice.</dd>
+        </div>
+        <div class="rise">
+          <dt>Gets through strict networks</dt>
+          <dd>Where a venue's network blocks live connections, Roomwave quietly switches to ordinary web requests.</dd>
+        </div>
+        <div class="rise">
+          <dt>One code for the whole hall</dt>
+          <dd>Up to {PLANS.organisation.participants.toLocaleString("en-KE")} people in one session on the Organisation plan, all answering at once.</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="section section-alt" aria-labelledby="who">
+    <div class="container">
+      <div class="section-head">
+        <p class="eyebrow">Who uses Roomwave</p>
+        <h2 class="h2" id="who">From forty people to a full conference hall.</h2>
+      </div>
+      <ul class="cases">
+        {
+          useCases.map((item) => (
+            <li class="rise">
+              <a href={item.href}>
+                <div class="photo-frame case-photo">
+                  <Image src={item.image} alt={item.alt} widths={[400, 640, 900]} sizes="(min-width: 1100px) 290px, (min-width: 700px) 45vw, 100vw" format="webp" />
+                </div>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="pricing">
+    <div class="container pricing">
+      <div class="section-head">
+        <p class="eyebrow">Pricing</p>
+        <h2 class="h2" id="pricing">Free for small rooms. Fair for big ones.</h2>
+      </div>
+      <ul class="plans">
+        <li>
+          <h3>Free</h3>
+          <p class="price"><strong>KSh 0</strong></p>
+          <p>Rooms of up to {PLANS.free.participants}, {PLANS.free.presentations} presentations, every kind of slide.</p>
+        </li>
+        <li class="featured">
+          <h3>Pro</h3>
+          <p class="price"><strong>{formatShillings(PLANS.pro.yearly!)}</strong> a month, paid yearly</p>
+          <p>Rooms of up to {PLANS.pro.participants}, unlimited presentations, PDF reports. 14 days free.</p>
+        </li>
+        <li>
+          <h3>Organisation</h3>
+          <p class="price"><strong>Quoted</strong></p>
+          <p>Up to {PLANS.organisation.participants.toLocaleString("en-KE")} people, invoices, and help with your event.</p>
+        </li>
+      </ul>
+      <a class="btn btn-ghost" href="/pricing">Compare the plans</a>
+    </div>
+  </section>
+
+  <section class="section section-alt" aria-labelledby="faq">
+    <div class="container faq">
+      <div class="section-head">
+        <p class="eyebrow">Questions</p>
+        <h2 class="h2" id="faq">Before you try it.</h2>
+      </div>
+      <div class="faq-list">
+        {
+          faqs.map((f) => (
+            <details>
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section stage-band final">
+    <div class="container final-inner">
+      <h2 class="display">Your next room is waiting.</h2>
+      <p class="lead">Try it now with a sample presentation and your own phone. It takes about a minute.</p>
+      <div class="cta">
+        <a class="btn btn-signal btn-large" href="/try">Try it free, no sign-up</a>
+        <a class="btn btn-ghost btn-large on-dark" href="/join">I have a code</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    padding: clamp(40px, 7vw, 96px) 0 clamp(48px, 6vw, 80px);
+    background: var(--paper);
+    background-image: radial-gradient(60% 70% at 90% 10%, rgb(255 194 61 / 0.22), transparent 65%), var(--grain);
+    overflow: hidden;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr);
+    align-items: center;
+    gap: clamp(32px, 5vw, 72px);
+  }
+
+  .hero-eyebrow {
+    margin-bottom: 18px;
+  }
+
+  .hero h1 {
+    max-width: 11ch;
+  }
+
+  .swash {
+    position: relative;
+    isolation: isolate;
+    white-space: nowrap;
+    color: var(--signal-strong);
+  }
+
+  .swash::after {
+    content: "";
+    position: absolute;
+    left: -0.04em;
+    right: 0.1em;
+    bottom: 0.02em;
+    height: 0.14em;
+    border-radius: 999px;
+    background: var(--sun);
+    z-index: -1;
+    transform-origin: 0 50%;
+    animation: draw 900ms 400ms var(--ease-out) both;
+  }
+
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+  }
+
+  .hero .lead {
+    margin-top: 26px;
+  }
+
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 32px;
+  }
+
+  .fine {
+    margin-top: 16px;
+    font-size: 0.92rem;
+    color: var(--ink-3);
+  }
+
+  .hero-poll {
+    display: grid;
+    gap: 12px;
+  }
+
+  .poll-caption {
+    font-size: 0.88rem;
+    color: var(--ink-3);
+    text-align: center;
+  }
+
+  .hero-copy > * {
+    animation: enter 700ms var(--ease-out) both;
+  }
+
+  .hero-copy > :nth-child(2) {
+    animation-delay: 80ms;
+  }
+
+  .hero-copy > :nth-child(3) {
+    animation-delay: 160ms;
+  }
+
+  .hero-copy > :nth-child(4) {
+    animation-delay: 240ms;
+  }
+
+  .hero-copy > :nth-child(5) {
+    animation-delay: 300ms;
+  }
+
+  .hero-poll {
+    animation: enter 800ms 250ms var(--ease-out) both;
+  }
+
+  @keyframes enter {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+    }
+  }
+
+  .photo-band {
+    padding-bottom: clamp(24px, 4vw, 48px);
+  }
+
+  .hall {
+    margin: 0;
+  }
+
+  .hall :global(.photo) {
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-3);
+  }
+
+  .hall figcaption {
+    margin-top: 14px;
+    font-size: 0.92rem;
+    color: var(--ink-3);
+    text-align: center;
+  }
+
+  .steps {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(20px, 3vw, 40px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .steps li {
+    display: grid;
+    gap: 10px;
+    align-content: start;
+    padding-top: 22px;
+    border-top: 2px solid var(--ink);
+  }
+
+  .num {
+    font-family: var(--font-display);
+    font-size: 3.2rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--signal);
+  }
+
+  .steps p {
+    color: var(--ink-2);
+  }
+
+  .phone-row {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(32px, 6vw, 96px);
+    margin-top: clamp(56px, 8vw, 112px);
+  }
+
+  .phone-photo {
+    margin: 0;
+  }
+
+  .phone-photo :global(.photo) {
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-3);
+  }
+
+  .phone-copy {
+    display: grid;
+    gap: 18px;
+  }
+
+  .ticks {
+    display: grid;
+    gap: 10px;
+    margin: 6px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .ticks li {
+    display: flex;
+    gap: 10px;
+    font-weight: 600;
+  }
+
+  .ticks li::before {
+    content: "";
+    flex: none;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: var(--lagoon) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 12.5l4 4L18 8'/%3E%3C/svg%3E") center / 14px no-repeat;
+  }
+
+  .kinds {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .kind {
+    margin: 0;
+  }
+
+  .kind.wide {
+    grid-column: 1 / -1;
+  }
+
+  .kind .screen {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    box-shadow: 0 30px 60px -24px rgb(0 0 0 / 0.65), 0 0 0 1px rgb(255 255 255 / 0.06);
+  }
+
+  .kind.wide .screen {
+    aspect-ratio: 21 / 9;
+  }
+
+  .kind figcaption {
+    margin-top: 14px;
+    color: var(--stage-muted);
+  }
+
+  .kind figcaption strong {
+    color: var(--stage-text);
+  }
+
+  .also {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 40px;
+    margin: 36px 0;
+    padding: 24px 0 0;
+    border-top: 1px solid var(--stage-line);
+    list-style: none;
+    color: var(--stage-muted);
+  }
+
+  .also strong {
+    color: var(--stage-text);
+    margin-right: 6px;
+  }
+
+  .on-dark {
+    --btn-fg: var(--stage-text);
+    --btn-border: var(--stage-line);
+  }
+
+  .on-dark:hover {
+    --btn-bg: var(--stage-2);
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin: 0;
+  }
+
+  .facts div {
+    padding: 24px;
+    border-radius: var(--radius-l);
+    background: var(--card);
+    border: 1px solid var(--line);
+  }
+
+  .facts dt {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+  }
+
+  .facts dd {
+    margin: 10px 0 0;
+    color: var(--ink-2);
+  }
+
+  .section-alt {
+    background: var(--paper-2);
+  }
+
+  .cases {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .cases a {
+    display: grid;
+    gap: 10px;
+    text-decoration: none;
+  }
+
+  .case-photo {
+    aspect-ratio: 4 / 3;
+    margin-bottom: 6px;
+  }
+
+  .case-photo :global(img) {
+    transition: transform 600ms var(--ease-out);
+  }
+
+  .cases a:hover .case-photo :global(img) {
+    transform: scale(1.04);
+  }
+
+  .cases h3 {
+    font-size: 1.25rem;
+  }
+
+  .cases a:hover h3 {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+  }
+
+  .cases p {
+    color: var(--ink-2);
+  }
+
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+    margin: 0 0 28px;
+    padding: 0;
+    list-style: none;
+  }
+
+  .plans li {
+    display: grid;
+    gap: 8px;
+    align-content: start;
+    padding: 26px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--card);
+  }
+
+  .plans li.featured {
+    background: var(--ink);
+    color: var(--paper);
+    border-color: var(--ink);
+  }
+
+  .plans h3 {
+    font-size: 1.4rem;
+  }
+
+  .price strong {
+    font-family: var(--font-display);
+    font-size: 1.8rem;
+  }
+
+  .plans p {
+    color: inherit;
+  }
+
+  .plans li:not(.featured) p:last-child {
+    color: var(--ink-2);
+  }
+
+  .featured p:last-child {
+    color: var(--stage-muted);
+  }
+
+  .faq {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 40px;
+  }
+
+  .faq-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  details {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--card);
+  }
+
+  summary {
+    position: relative;
+    padding: 18px 56px 18px 22px;
+    font-weight: 600;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: "+";
+    position: absolute;
+    right: 22px;
+    top: 50%;
+    font-size: 1.5rem;
+    line-height: 1;
+    color: var(--ink-3);
+    transform: translateY(-50%);
+    transition: transform 200ms ease;
+  }
+
+  details[open] summary::after {
+    transform: translateY(-50%) rotate(45deg);
+  }
+
+  details p {
+    padding: 0 22px 20px;
+    color: var(--ink-2);
+  }
+
+  .final-inner {
+    display: grid;
+    justify-items: center;
+    gap: 22px;
+    text-align: center;
+  }
+
+  .final h2 {
+    max-width: 14ch;
+  }
+
+  .final .cta {
+    justify-content: center;
+    margin-top: 6px;
+  }
+
+  @media (max-width: 1040px) {
+    .facts,
+    .cases {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid,
+    .phone-row,
+    .faq {
+      grid-template-columns: 1fr;
+    }
+
+    .steps,
+    .plans {
+      grid-template-columns: 1fr;
+    }
+
+    .kinds {
+      grid-template-columns: 1fr;
+    }
+
+    .kind.wide .screen {
+      aspect-ratio: 16 / 9;
+    }
+  }
+
+  @media (max-width: 560px) {
+    .facts,
+    .cases {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

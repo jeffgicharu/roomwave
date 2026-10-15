@@ -1,0 +1,252 @@
+---
+import { Image } from "astro:assets";
+
+import type { Results, Slide, SlideState } from "@roomwave/shared";
+import SlideView from "@roomwave/ui/components/SlideView.svelte";
+import SampleStage from "@roomwave/ui/components/SampleStage.svelte";
+import { THEMES_BY_ID } from "@roomwave/ui/themes";
+
+import presenter from "../assets/photos/presenter-laptop.jpg";
+import workshop from "../assets/photos/workshop-table.jpg";
+import PageHero from "../components/PageHero.astro";
+import Base from "../layouts/Base.astro";
+
+const quiz: Slide = {
+  id: "featurequiz1",
+  type: "quiz",
+  config: {
+    question: "Which is the largest lake in Africa by area?",
+    options: [
+      { id: "a1", label: "Lake Tanganyika" },
+      { id: "a2", label: "Lake Victoria" },
+      { id: "a3", label: "Lake Malawi" },
+      { id: "a4", label: "Lake Turkana" },
+    ],
+    correctOptionId: "a2",
+    timeLimit: 20,
+  },
+};
+const quizResults: Results = { type: "quiz", respondents: 48, counts: { a1: 9, a2: 31, a3: 6, a4: 2 } };
+const quizState: SlideState = { locked: false, resultsHidden: false, quiz: { phase: "reveal", startedAt: 1, endsAt: 2 } };
+
+const groups = [
+  {
+    title: "While you present",
+    items: [
+      ["Phone remote", "Scan a private code and move between slides from anywhere in the room, with the questions in your hand."],
+      ["Hide the results", "Collect answers first and reveal them when you are ready, so nobody follows the crowd."],
+      ["Close answers", "Stop answers on a slide with one key, and open them again just as easily."],
+      ["Moderate questions", "Approve each question before it reaches the screen, mark it answered, or hide it."],
+      ["Keyboard shortcuts", "Arrows to move, H to hide results, L to close answers, Q for the join code, F for full screen."],
+      ["Four themes", "Paper, Stage, Lagoon and Sunrise, so the slides suit a bright classroom or a dim hall."],
+    ],
+  },
+  {
+    title: "After the session",
+    items: [
+      ["Every answer saved", "Each time you present, the answers are kept separately, so last week's session stays as it was."],
+      ["Spreadsheet export", "A CSV of every slide's answers, ready for Excel or Google Sheets."],
+      ["PDF reports", "A clean report with every chart and the leaderboard, to share with your team. On Pro."],
+      ["Emailed to you", "Send the report to your inbox when the session ends. On Pro."],
+    ],
+  },
+  {
+    title: "Safe and fair",
+    items: [
+      ["Anonymous by default", "People answer without an account. Names are optional, and only where you allow them."],
+      ["Word filter", "Offensive words are refused in word clouds, questions and nicknames before they reach the screen."],
+      ["One vote each", "A phone that reconnects is still the same person, so nobody is counted twice."],
+      ["Fair quiz timing", "The clock runs on our server, not on the phones, so a slow phone is never cheated of time."],
+    ],
+  },
+];
+---
+
+<Base title="Features" description="Polls, word clouds, rating scales, timed quizzes and audience Q&A, with a phone remote, moderation, PDF reports and a word filter." path="/features">
+  <PageHero eyebrow="Features" title="Everything a room can say, and nothing it can't." lead="Six kinds of slide, presenter tools that stay out of your way, and results you can keep. Here is all of it." />
+
+  <section class="section-tight">
+    <div class="container feature">
+      <div class="copy">
+        <p class="eyebrow">Multiple choice</p>
+        <h2 class="h3">Ask, and watch the answer form.</h2>
+        <p>One answer or several, up to six choices. Columns rise as votes land; long answers switch to rows so they stay readable from the back.</p>
+      </div>
+      <div class="screen"><SampleStage client:visible scenario="poll" theme="paper" pace={800} /></div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container feature flip">
+      <div class="copy">
+        <p class="eyebrow">Quizzes</p>
+        <h2 class="h3">Points for being right, and for being quick.</h2>
+        <p>
+          Start the timer and everyone answers at once. A correct answer is worth up to 1,000 points, less the longer it takes. Reveal the answer, then the leaderboard, and
+          every phone shows its own score and place.
+        </p>
+      </div>
+      <div class="screen"><SlideView slide={quiz} results={quizResults} state={quizState} theme={THEMES_BY_ID.ink} /></div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container feature">
+      <div class="copy">
+        <p class="eyebrow">Word clouds</p>
+        <h2 class="h3">The room's mood in one picture.</h2>
+        <p>People send up to three short answers each. The most common grow in the middle, and spelling and capitals do not split a word in two.</p>
+      </div>
+      <div class="screen"><SampleStage client:visible scenario="wordcloud" theme="lagoon" pace={700} /></div>
+    </div>
+  </section>
+
+  <section class="section-tight">
+    <div class="container feature flip">
+      <div class="copy">
+        <p class="eyebrow">Q&amp;A and ratings</p>
+        <h2 class="h3">The question everyone wanted to ask.</h2>
+        <p>Questions arrive anonymously or with a name, the room upvotes the ones it wants answered, and you choose what shows. Rating scales give you the average at a glance.</p>
+      </div>
+      <div class="screen"><SampleStage client:visible scenario="qna" theme="sunrise" pace={900} /></div>
+    </div>
+  </section>
+
+  {
+    groups.map((group, index) => (
+      <section class:list={["section-tight", { alt: index % 2 === 0 }]}>
+        <div class="container">
+          <h2 class="h3 group-title">{group.title}</h2>
+          <ul class="grid">
+            {group.items.map(([title, body]) => (
+              <li>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+    ))
+  }
+
+  <section class="section">
+    <div class="container pair">
+      <div class="photo-frame tall">
+        <Image src={presenter} alt="A presenter at a lectern glances at his laptop while speaking to a hall" widths={[480, 800, 1100]} sizes="(min-width: 900px) 45vw, 100vw" format="webp" />
+      </div>
+      <div class="pair-copy">
+        <p class="eyebrow">Made for presenters</p>
+        <h2 class="h2">You keep talking. Roomwave keeps count.</h2>
+        <p class="lead">
+          Build a presentation in minutes from a template, present from any laptop, and pick it up again later. Edit a slide in the middle of a session and present again: the
+          answers already given are kept.
+        </p>
+        <div class="photo-frame small">
+          <Image src={workshop} alt="A small workshop around a table covered in sticky notes" widths={[400, 700]} sizes="(min-width: 900px) 30vw, 100vw" format="webp" />
+        </div>
+        <a class="btn btn-signal btn-large" href="/try">Try it free, no sign-up</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .feature {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: clamp(28px, 5vw, 72px);
+  }
+
+  .feature.flip .copy {
+    order: 2;
+  }
+
+  .copy {
+    display: grid;
+    gap: 14px;
+  }
+
+  .copy p:not(.eyebrow) {
+    color: var(--ink-2);
+    font-size: 1.05rem;
+  }
+
+  .screen {
+    aspect-ratio: 16 / 9;
+    border-radius: var(--radius-l);
+    overflow: hidden;
+    box-shadow: var(--shadow-3);
+  }
+
+  .alt {
+    background: var(--paper-2);
+  }
+
+  .group-title {
+    margin-bottom: 24px;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .grid li {
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--card);
+  }
+
+  .grid h3 {
+    font-size: 1.15rem;
+  }
+
+  .grid p {
+    margin-top: 8px;
+    color: var(--ink-2);
+  }
+
+  .pair {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: clamp(28px, 5vw, 72px);
+    align-items: center;
+  }
+
+  .tall {
+    aspect-ratio: 4 / 5;
+  }
+
+  .pair-copy {
+    display: grid;
+    gap: 20px;
+    justify-items: start;
+  }
+
+  .small {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+  }
+
+  @media (max-width: 900px) {
+    .feature,
+    .pair {
+      grid-template-columns: 1fr;
+    }
+
+    .feature.flip .copy {
+      order: 0;
+    }
+
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

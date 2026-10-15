@@ -1,0 +1,95 @@
+---
+import { PLANS, TRIAL_DAYS } from "@roomwave/shared";
+
+import PageHero from "../components/PageHero.astro";
+import PricingTable from "../components/PricingTable.svelte";
+import Base from "../layouts/Base.astro";
+
+const faqs = [
+  { q: "What counts as a person in a session?", a: `Each phone that joins a session counts once, however many questions it answers. On Free, the ${PLANS.free.participants + 1}st phone is told the session is full.` },
+  { q: "What happens when my trial ends?", a: `After ${TRIAL_DAYS} days you are back on Free. Nothing is deleted: presentations over the Free limit stay, and you can still present them.` },
+  { q: "How do we pay?", a: "By invoice. Organisations pay by bank transfer or M-Pesa paybill, monthly or for the year. Ask for an invoice from the contact page." },
+  { q: "Is there a price for a single event?", a: "Yes. For a conference or a one-off event, tell us the date and the size of the room and we will quote for the event alone." },
+  { q: "Do my audience pay anything?", a: "Never. Joining is free for everyone in the room, and needs no account." },
+];
+
+const faqData = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+};
+---
+
+<Base title="Pricing" description={`Free for rooms of up to ${PLANS.free.participants}. Pro for trainers and lecturers, with a ${TRIAL_DAYS}-day trial. Organisation plans for conferences and big rooms. Prices in Kenyan shillings.`} path="/pricing" structuredData={[faqData]}>
+  <PageHero eyebrow="Pricing" title="Free for small rooms. Fair for big ones." lead="Prices are in Kenyan shillings. Your audience never pays, and never needs an account." centred />
+
+  <section class="section-tight">
+    <div class="container">
+      <PricingTable client:visible />
+      <p class="note">Need it for one conference? <a href="/contact?topic=event">Ask for an event price</a>.</p>
+    </div>
+  </section>
+
+  <section class="section alt">
+    <div class="container faq">
+      <h2 class="h2">Common questions</h2>
+      <dl>
+        {
+          faqs.map((f) => (
+            <div>
+              <dt>{f.q}</dt>
+              <dd>{f.a}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .note {
+    margin-top: 28px;
+    text-align: center;
+    color: var(--ink-3);
+  }
+
+  .note a {
+    color: var(--signal-strong);
+    font-weight: 600;
+  }
+
+  .alt {
+    background: var(--paper-2);
+  }
+
+  .faq {
+    display: grid;
+    grid-template-columns: minmax(0, 0.7fr) minmax(0, 1.3fr);
+    gap: 40px;
+  }
+
+  dl {
+    display: grid;
+    gap: 28px;
+    margin: 0;
+  }
+
+  dt {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+
+  dd {
+    margin: 8px 0 0;
+    color: var(--ink-2);
+  }
+
+  @media (max-width: 900px) {
+    .faq {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

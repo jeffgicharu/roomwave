@@ -1,0 +1,97 @@
+---
+import { getCollection } from "astro:content";
+
+import PageHero from "../../components/PageHero.astro";
+import Base from "../../layouts/Base.astro";
+
+const articles = (await getCollection("help")).sort((a, b) => a.data.order - b.data.order);
+const sections = ["Getting started", "Presenting", "Results and plans"] as const;
+---
+
+<Base title="Help centre" description="Guides to running sessions with Roomwave: how people join, the six kinds of slide, quizzes, moderating questions, results and plans." path="/help">
+  <PageHero eyebrow="Help centre" title="Everything you need to run a good session." lead="Short guides, written for presenters. Can't find it? Write to us from the contact page." />
+  <section class="section-tight">
+    <div class="container sections">
+      {
+        sections.map((section) => (
+          <section aria-labelledby={`s-${section}`}>
+            <h2 class="h3" id={`s-${section}`}>{section}</h2>
+            <ul>
+              {articles
+                .filter((a) => a.data.section === section)
+                .map((article) => (
+                  <li>
+                    <a href={`/help/${article.id}`}>
+                      <strong>{article.data.title}</strong>
+                      <span>{article.data.description}</span>
+                    </a>
+                  </li>
+                ))}
+            </ul>
+          </section>
+        ))
+      }
+      <aside class="contact">
+        <h2 class="h3">Still stuck?</h2>
+        <p>Tell us what you were trying to do. We usually reply within one working day.</p>
+        <a class="btn" href="/contact?topic=support">Contact us</a>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .sections {
+    display: grid;
+    gap: 48px;
+  }
+
+  ul {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 340px), 1fr));
+    gap: 14px;
+    margin: 18px 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  li a {
+    display: grid;
+    gap: 6px;
+    height: 100%;
+    padding: 22px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--card);
+    text-decoration: none;
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+
+  li a:hover {
+    border-color: var(--ink-4);
+    box-shadow: var(--shadow-2);
+  }
+
+  li strong {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    letter-spacing: -0.01em;
+  }
+
+  li span {
+    color: var(--ink-3);
+  }
+
+  .contact {
+    display: grid;
+    justify-items: start;
+    gap: 12px;
+    padding: 28px;
+    border-radius: var(--radius-l);
+    background: var(--paper-2);
+  }
+
+  .contact p {
+    color: var(--ink-2);
+  }
+</style>

@@ -1,0 +1,11 @@
+# Crawlers may read the public pages; each page asks not to be indexed.
+User-agent: *
+Allow: /
+Disallow: /app
+Disallow: /api/
+Disallow: /present/
+Disallow: /remote/
+Disallow: /staff
+Disallow: /try
+
+Sitemap: https://roomwave.jeffgicharu.com/sitemap-index.xml
