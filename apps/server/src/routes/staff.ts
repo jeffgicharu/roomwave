@@ -50,9 +50,9 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
         .selectFrom("users")
         .select([
           sql<number>`count(*) filter (where not is_guest and role = 'customer')`.as("accounts"),
-          sql<number>`count(*) filter (where created_at >= date_trunc('day', now() at time zone 'Africa/Nairobi') at time zone 'Africa/Nairobi' and not is_guest)`.as("today"),
-          sql<number>`count(*) filter (where plan = 'free' and trial_ends_at > now())`.as("trial"),
-          sql<number>`count(*) filter (where plan <> 'free')`.as("paying"),
+          sql<number>`count(*) filter (where created_at >= date_trunc('day', now() at time zone 'Africa/Nairobi') at time zone 'Africa/Nairobi' and not is_guest and role = 'customer')`.as("today"),
+          sql<number>`count(*) filter (where plan = 'free' and trial_ends_at > now() and role = 'customer')`.as("trial"),
+          sql<number>`count(*) filter (where plan <> 'free' and role = 'customer')`.as("paying"),
         ])
         .executeTakeFirstOrThrow(),
       db
@@ -252,7 +252,7 @@ export async function staffRoutes(app: FastifyInstance): Promise<void> {
     const from = row.trial_ends_at && row.trial_ends_at > new Date() ? row.trial_ends_at : new Date();
     const until = new Date(from.getTime() + 7 * 86_400_000);
     await db.updateTable("users").set({ trial_ends_at: until }).where("id", "=", row.id).execute();
-    await logAction(staff.id, "extend_trial", { userId: row.id }, `Trial now ends ${until.toISOString().slice(0, 10)}`);
+    await logAction(staff.id, "extend_trial", { userId: row.id }, `Trial now ends ${until.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Africa/Nairobi" })}`);
     return { ok: true, trialEndsAt: until.toISOString() };
   });
 

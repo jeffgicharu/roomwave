@@ -58,16 +58,16 @@
 {:else}
   <ul class="processes">
     {#each data.processes as p (p.name)}
-      {@const memory = level(p.rssMb, p.limitMb)}
+      {@const memory = level(p.memoryMb, p.limitMb)}
       <li class="staff-panel">
         <header>
           <h2>{p.name.startsWith("web") ? `Web and live server (${p.name.replace("web-", "port ")})` : "Background worker"}</h2>
           <span class="status {memory.tone}"><span class="dot" aria-hidden="true"></span>{memory.label}</span>
         </header>
-        <div class="meter" role="meter" aria-valuemin="0" aria-valuemax={p.limitMb} aria-valuenow={p.rssMb} aria-label="Memory used">
-          <span class={memory.tone} style={`width:${Math.min(100, (p.rssMb / p.limitMb) * 100)}%`}></span>
+        <div class="meter" role="meter" aria-valuemin="0" aria-valuemax={p.limitMb} aria-valuenow={p.memoryMb} aria-label="Memory used">
+          <span class={memory.tone} style={`width:${Math.min(100, (p.memoryMb / p.limitMb) * 100)}%`}></span>
         </div>
-        <p class="meter-label"><strong>{p.rssMb} MB</strong> of {p.limitMb} MB memory</p>
+        <p class="meter-label"><strong>{p.memoryMb} MB</strong> of {p.limitMb} MB memory</p>
         <dl>
           <div><dt>Event loop delay</dt><dd>{p.eventLoopDelayMs} ms</dd></div>
           <div><dt>Live connections</dt><dd>{p.connections ?? "–"}</dd></div>

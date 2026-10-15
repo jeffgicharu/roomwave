@@ -23,10 +23,12 @@
     return new Date(`${day}T12:00:00`).toLocaleDateString("en-GB", { day: "numeric", month: "short" });
   }
 
-  const W = 640;
+  // Drawn at the width it is shown, so its text keeps its size however wide the card is.
+  let plotWidth = $state(640);
+  const W = $derived(Math.max(280, Math.round(plotWidth)));
   const H = 220;
   const PAD = { left: 32, right: 8, top: 18, bottom: 26 };
-  const plotW = W - PAD.left - PAD.right;
+  const plotW = $derived(W - PAD.left - PAD.right);
   const plotH = H - PAD.top - PAD.bottom;
   const slot = $derived(plotW / Math.max(1, days.length));
   const barW = $derived(Math.min(26, slot * 0.6));
@@ -48,7 +50,7 @@
       </tbody>
     </table>
   {:else}
-    <div class="plot">
+    <div class="plot" bind:clientWidth={plotWidth}>
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={`${label}: ${days.map((d) => `${short(d.day)} ${d.count}`).join(", ")}`}>
         {#each ticks as tick (tick)}
           <line class="grid" x1={PAD.left} x2={W - PAD.right} y1={y(tick)} y2={y(tick)} />

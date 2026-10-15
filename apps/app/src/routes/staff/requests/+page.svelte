@@ -74,7 +74,7 @@
             {#if r.handledAt}
               <button class="btn btn-small btn-ghost" type="button" onclick={() => mark(r, false)}>Reopen</button>
             {:else}
-              <button class="btn btn-small" type="button" onclick={() => mark(r, true)}><Icon name="check" size={16} /> Handled</button>
+              <button class="btn btn-small" type="button" onclick={() => mark(r, true)}><Icon name="check" size={16} /> Mark handled</button>
             {/if}
           </div>
         </header>

@@ -123,10 +123,6 @@
     color: var(--ink-3);
   }
 
-  .chart {
-    max-width: 900px;
-  }
-
   @media (max-width: 1000px) {
     .tiles {
       grid-template-columns: repeat(2, minmax(0, 1fr));

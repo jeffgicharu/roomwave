@@ -200,7 +200,8 @@ export interface ProcessHealth {
   name: string;
   release: string;
   uptimeSeconds: number;
-  rssMb: number;
+  /** Memory counted against limitMb: the service's own share under systemd, otherwise the resident size. */
+  memoryMb: number;
   heapUsedMb: number;
   limitMb: number;
   eventLoopDelayMs: number;

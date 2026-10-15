@@ -42,7 +42,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
     }
     const user = await db
       .insertInto("users")
-      .values({ name: input.name, email: input.email, password_hash: await hashPassword(input.password) })
+      .values({ name: input.name, email: input.email, password_hash: await hashPassword(input.password), last_active_at: new Date() })
       .returningAll()
       .executeTakeFirstOrThrow();
     await insertFromTemplate(user.id, "welcome");
@@ -99,6 +99,7 @@ export async function authRoutes(app: FastifyInstance): Promise<void> {
         name: "Guest",
         is_guest: true,
         guest_expires_at: new Date(Date.now() + GUEST_HOURS * 3_600_000),
+        last_active_at: new Date(),
       })
       .returningAll()
       .executeTakeFirstOrThrow();

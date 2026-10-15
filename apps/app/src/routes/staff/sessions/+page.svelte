@@ -80,7 +80,7 @@
             <td><strong>{s.title}</strong><span class="staff-sub">Code {formatJoinCode(s.code)}</span></td>
             <td><a href={`/staff/customers/${s.ownerId}`}>{s.owner}</a></td>
             <td>{timeAgo(s.startedAt)}</td>
-            <td class="num"><span class="online">{s.online}</span></td>
+            <td class="num"><span class="online" class:none={s.online === 0}>{s.online}</span></td>
             <td class="num">{s.participants}</td>
             <td class="num">{s.responses}</td>
             <td class="num">
@@ -115,6 +115,16 @@
     height: 8px;
     border-radius: 50%;
     background: var(--success);
+  }
+
+  /* Nobody connected: the dot stays grey rather than signalling a live room. */
+  .online.none {
+    font-weight: 500;
+    color: var(--ink-3);
+  }
+
+  .online.none::before {
+    background: var(--ink-4);
   }
 
   .danger {
