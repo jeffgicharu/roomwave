@@ -308,6 +308,12 @@
     transform: translateY(-2px);
   }
 
+  /* A card's open menu reaches over the card below it, so that card sits above its neighbours. */
+  .card:has(:global([aria-expanded="true"])) {
+    position: relative;
+    z-index: 3;
+  }
+
   .skeleton {
     min-height: 300px;
     background: linear-gradient(90deg, var(--paper-2), var(--card), var(--paper-2));

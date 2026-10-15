@@ -717,8 +717,11 @@
     cursor: pointer;
   }
 
+  /* A neutral look rather than a faded accent, which turns muddy on some themes. */
   .action:disabled {
-    opacity: 0.45;
+    background: var(--t-surface);
+    color: var(--t-muted);
+    box-shadow: inset 0 0 0 2px var(--t-line);
     cursor: not-allowed;
   }
 

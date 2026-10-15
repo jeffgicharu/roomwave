@@ -86,7 +86,7 @@
             class:mine={mine === option.id}
             aria-pressed={mine === option.id}
             disabled={sending}
-            style={`--share:${(poll.counts[option.id] ?? 0) / most};--c:${colours[i % colours.length]}`}
+            style={`--share:${(poll.counts[option.id] ?? 0) / most};--any:${poll.counts[option.id] ? 1 : 0};--c:${colours[i % colours.length]}`}
             onclick={() => vote(option.id)}
           >
             <span class="fill" aria-hidden="true"></span>
@@ -213,7 +213,7 @@
     background: var(--c);
     opacity: 0.32;
     transform-origin: 0 50%;
-    transform: scaleX(max(var(--share), 0.01));
+    transform: scaleX(max(var(--share), calc(0.01 * var(--any))));
     transition: transform 800ms var(--ease-spring);
   }
 

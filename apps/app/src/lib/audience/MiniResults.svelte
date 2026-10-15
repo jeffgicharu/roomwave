@@ -38,7 +38,7 @@
     </h3>
     <ul class:compact={slide.type === "scale"}>
       {#each rows as row (row.label)}
-        <li style={`--share:${row.count / most};--c:${row.color}`}>
+        <li style={`--share:${row.count / most};--any:${row.count ? 1 : 0};--c:${row.color}`}>
           <span class="label">{row.label}</span>
           <span class="track"><span class="fill"></span></span>
           <span class="value">{results?.type === "wordcloud" ? row.count : `${row.of ? Math.round((row.count / row.of) * 100) : 0}%`}</span>
@@ -65,31 +65,38 @@
 
   ul {
     display: grid;
-    gap: 10px;
+    gap: 14px;
     margin: 0;
     padding: 0;
     list-style: none;
   }
 
+  /* The answer reads in full on its own line, with its bar below. */
   li {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 44px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas:
+      "label value"
+      "track track";
     align-items: center;
-    gap: 10px;
+    gap: 6px 12px;
     font-size: 0.92rem;
   }
 
+  /* Ratings are single numbers, so each fits on one row. */
   .compact li {
     grid-template-columns: 28px minmax(0, 1fr) 44px;
+    grid-template-areas: "label track value";
+    gap: 10px;
   }
 
   .label {
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    grid-area: label;
+    overflow-wrap: anywhere;
   }
 
   .track {
+    grid-area: track;
     height: 10px;
     border-radius: 999px;
     background: var(--t-track);
@@ -102,11 +109,12 @@
     border-radius: inherit;
     background: var(--c);
     transform-origin: 0 50%;
-    transform: scaleX(max(var(--share), 0.02));
+    transform: scaleX(max(var(--share), calc(0.02 * var(--any))));
     transition: transform 500ms var(--ease-spring);
   }
 
   .value {
+    grid-area: value;
     text-align: right;
     font-weight: 700;
     font-variant-numeric: tabular-nums;

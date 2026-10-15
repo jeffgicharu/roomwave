@@ -49,7 +49,7 @@
       class:correct={correctId === option.id}
       class:wrong={correctId !== null && correctId !== option.id}
       role="listitem"
-      style={`--share:${share};--color:${color(i, option.id)};--delay:${i * 60}ms`}
+      style={`--share:${share};--any:${count(option.id) ? 1 : 0};--color:${color(i, option.id)};--delay:${i * 60}ms`}
     >
       {#if resolved === "columns"}
         <div class="value">
@@ -139,7 +139,7 @@
     background: var(--color);
     border-radius: inherit;
     transform-origin: 50% 100%;
-    transform: scaleY(max(var(--share), 0.015));
+    transform: scaleY(max(var(--share), calc(0.015 * var(--any))));
     transition: transform 700ms var(--ease-spring, cubic-bezier(0.34, 1.42, 0.64, 1)) var(--delay),
       background-color 300ms ease;
   }
@@ -193,7 +193,7 @@
     background: var(--color);
     border-radius: inherit;
     transform-origin: 0 50%;
-    transform: scaleX(max(var(--share), 0.012));
+    transform: scaleX(max(var(--share), calc(0.012 * var(--any))));
     transition: transform 700ms var(--ease-spring, cubic-bezier(0.34, 1.42, 0.64, 1)) var(--delay),
       background-color 300ms ease;
   }

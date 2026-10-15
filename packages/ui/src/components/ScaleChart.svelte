@@ -25,7 +25,7 @@
     <div class="columns">
       {#each values as value (value)}
         {@const count = counts[String(value)] ?? 0}
-        <div class="column" style={`--share:${count / top};--delay:${value * 40}ms`}>
+        <div class="column" style={`--share:${count / top};--any:${count ? 1 : 0};--delay:${value * 40}ms`}>
           <span class="count">{count}</span>
           <div class="track"><div class="fill"></div></div>
           <span class="value">{value}</span>
@@ -118,7 +118,7 @@
     border-radius: inherit;
     background: var(--t-accent, var(--signal));
     transform-origin: 50% 100%;
-    transform: scaleY(max(var(--share), 0.02));
+    transform: scaleY(max(var(--share), calc(0.02 * var(--any))));
     transition: transform 700ms var(--ease-spring, cubic-bezier(0.34, 1.42, 0.64, 1)) var(--delay);
   }
 

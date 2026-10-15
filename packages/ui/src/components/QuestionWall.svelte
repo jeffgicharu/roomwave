@@ -10,29 +10,61 @@
 
   let { questions, limit = 6, hint = "No questions yet. Send one from your phone." }: Props = $props();
 
-  const live = $derived(questions.filter((q) => q.status === "live").slice(0, limit));
+  const allLive = $derived(questions.filter((q) => q.status === "live"));
+  const live = $derived(allLive.slice(0, limit));
   const answered = $derived(questions.filter((q) => q.status === "answered").length);
+
+  // Only whole cards are shown: one that would be cut off by the bottom of the
+  // screen steps aside, and the line below says how many more there are.
+  let list: HTMLOListElement | undefined = $state();
+  let fitting = $state<number | null>(null);
+  const shown = $derived(fitting === null ? live.length : Math.min(fitting, live.length));
+  const more = $derived(allLive.length - shown);
+
+  $effect(() => {
+    if (!list) return;
+    void live.length;
+    const element = list;
+    const measure = () => {
+      const bottom = element.clientHeight + 1;
+      let count = 0;
+      for (const child of element.children) {
+        const item = child as HTMLElement;
+        if (item.offsetTop + item.offsetHeight > bottom) break;
+        count += 1;
+      }
+      fitting = count;
+    };
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  });
 </script>
 
 <div class="wall">
   {#if live.length}
-    <ol>
+    <ol bind:this={list}>
       {#each live as question, i (question.id)}
-        <li class:top={i === 0}>
+        <li class:top={i === 0} class:cut={i >= shown} aria-hidden={i >= shown ? "true" : undefined}>
           <span class="votes" aria-label={`${question.upvotes} upvotes`}>
             <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3 14 11H2z" fill="currentColor" /></svg>
             {question.upvotes}
           </span>
-          <p class="text">{question.text}</p>
-          {#if question.name}<span class="name">{question.name}</span>{/if}
+          <div class="body">
+            <p class="text">{question.text}</p>
+            {#if question.name}<span class="name">{question.name}</span>{/if}
+          </div>
         </li>
       {/each}
     </ol>
   {:else}
     <p class="empty">{answered ? "Every question so far has been answered. Ask another from your phone." : hint}</p>
   {/if}
-  {#if answered}
-    <p class="answered">{answered} answered</p>
+  {#if answered || more > 0}
+    <p class="foot">
+      {#if more > 0}{more} more {more === 1 ? "question" : "questions"}{/if}{#if more > 0 && answered}&nbsp;·&nbsp;{/if}{#if answered}{answered} answered{/if}
+    </p>
   {/if}
 </div>
 
@@ -56,14 +88,14 @@
     list-style: none;
     min-height: 0;
     overflow: hidden;
+    position: relative;
   }
 
+  /* Flex rather than grid: a grid sized the clamped text as three lines however short it was. */
   li {
-    display: grid;
-    grid-template-columns: auto 1fr;
-    grid-template-rows: auto auto;
-    column-gap: calc(var(--u) * 1.4);
-    align-items: start;
+    display: flex;
+    gap: calc(var(--u) * 1.4);
+    align-items: flex-start;
     padding: calc(var(--u) * 1.4) calc(var(--u) * 1.6);
     border-radius: calc(var(--u) * 1.4);
     background: var(--t-surface, var(--card));
@@ -77,8 +109,17 @@
     box-shadow: 0 0 0 calc(var(--u) * 0.2) var(--t-accent, var(--signal));
   }
 
+  li.cut {
+    visibility: hidden;
+  }
+
+  .body {
+    display: grid;
+    min-width: 0;
+  }
+
   .votes {
-    grid-row: span 2;
+    flex: none;
     display: grid;
     justify-items: center;
     gap: calc(var(--u) * 0.2);
@@ -134,7 +175,7 @@
     font-size: calc(var(--u) * 1.9);
   }
 
-  .answered {
+  .foot {
     margin-top: calc(var(--u) * 1);
     font-size: calc(var(--u) * 1.25);
     color: var(--t-muted, var(--ink-3));
