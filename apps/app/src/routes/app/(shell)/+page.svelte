@@ -118,7 +118,7 @@
 {#if welcome && presentations?.length}
   <section class="welcome">
     <div>
-      <p class="eyebrow">{welcome === "guest" ? "Your guest workspace" : "Welcome to Roomwave"}</p>
+      <p class="eyebrow">{welcome === "guest" && session.user?.isGuest ? "Your guest workspace" : "Welcome to Roomwave"}</p>
       <h2>Your sample presentation is ready.</h2>
       <p>
         Press <strong>Present</strong>, then scan the code on the screen with your phone and answer. Watch the results move on

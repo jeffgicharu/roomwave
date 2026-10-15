@@ -13,6 +13,7 @@ import {
 } from "@roomwave/shared";
 
 import { requireUser } from "../auth/sessions.ts";
+import { config } from "../config.ts";
 import { db } from "../db/database.ts";
 import type { UserRow } from "../db/schema.ts";
 import { emailHold } from "../email/send.ts";
@@ -32,12 +33,12 @@ async function sessionFor(id: string, user: UserRow) {
   return row;
 }
 
-/** Changes whenever the results change, so a saved report is reused until then. */
+/** Changes whenever the results or the release change, so a saved report is reused until then and always has the current layout. */
 export async function resultsFingerprint(sessionId: string): Promise<number> {
   const row = await db.selectFrom("live_sessions").select(["slides", "ended_at"]).where("id", "=", sessionId).executeTakeFirstOrThrow();
   const results = await allResults(sessionId, row.slides);
   const digest = createHash("sha256")
-    .update(JSON.stringify([row.ended_at?.getTime() ?? null, row.slides, results]))
+    .update(JSON.stringify([config.RELEASE, row.ended_at?.getTime() ?? null, row.slides, results]))
     .digest("hex");
   return parseInt(digest.slice(0, 12), 16);
 }
