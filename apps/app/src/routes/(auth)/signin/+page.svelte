@@ -7,7 +7,7 @@
 
   import { post } from "#lib/api.ts";
   import PasswordField from "#lib/components/PasswordField.svelte";
-  import { check, describe } from "#lib/forms.ts";
+  import { check, clearEdited, describe } from "#lib/forms.ts";
   import { safeNext, session } from "#lib/session.svelte.ts";
 
   let email = $state("");
@@ -54,7 +54,7 @@
 <h1>Welcome back</h1>
 <p class="sub">Sign in to your presentations and results.</p>
 
-<form onsubmit={submit} novalidate>
+<form onsubmit={submit} oninput={(event) => (errors = clearEdited(errors, event))} novalidate>
   {#if reason === "signed_out"}
     <p class="notice notice-info form-notice">Please sign in again to continue.</p>
   {/if}

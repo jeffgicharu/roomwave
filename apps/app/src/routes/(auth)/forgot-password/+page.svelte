@@ -2,7 +2,7 @@
   import { forgotSchema } from "@roomwave/shared";
 
   import { post } from "#lib/api.ts";
-  import { check, describe } from "#lib/forms.ts";
+  import { check, clearEdited, describe } from "#lib/forms.ts";
 
   let email = $state("");
   let errors = $state<Record<string, string>>({});
@@ -49,7 +49,7 @@
   <h1>Forgot your password?</h1>
   <p class="sub">Enter the email you signed up with and we will send you a link to choose a new one.</p>
 
-  <form onsubmit={submit} novalidate>
+  <form onsubmit={submit} oninput={(event) => (errors = clearEdited(errors, event))} novalidate>
     {#if message}<p class="notice notice-error form-notice" role="alert">{message}</p>{/if}
     <div class="field">
       <label class="label" for="email">Email</label>

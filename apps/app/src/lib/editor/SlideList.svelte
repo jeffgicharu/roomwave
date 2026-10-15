@@ -2,6 +2,7 @@
   import { LIMITS, SLIDE_TYPES, SLIDE_TYPE_LABELS, blankSlide, newId, slideProblems, slideTitle, type Slide, type SlideType } from "@roomwave/shared";
 
   import Icon from "../components/Icon.svelte";
+  import { toasts } from "../toast.svelte.ts";
   import Menu from "../components/Menu.svelte";
   import TypeIcon from "../components/TypeIcon.svelte";
 
@@ -46,8 +47,17 @@
 
   function remove(index: number) {
     if (slides.length <= 1) return;
-    slides.splice(index, 1);
+    const [gone] = slides.splice(index, 1);
     selected = Math.max(0, Math.min(selected, slides.length - 1));
+    // A slip of the finger should not cost a slide: it can come back for a few seconds.
+    toasts.show(`Slide ${index + 1} deleted.`, "info", 8000, {
+      label: "Undo",
+      run: () => {
+        if (!gone || slides.length >= LIMITS.slides) return;
+        slides.splice(Math.min(index, slides.length), 0, gone);
+        selected = Math.min(index, slides.length - 1);
+      },
+    });
   }
 
   function move(from: number, to: number) {

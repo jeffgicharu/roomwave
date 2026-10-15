@@ -3,7 +3,7 @@
   import { page } from "$app/state";
   import { onMount } from "svelte";
 
-  import { TEMPLATES, formatJoinCode, type PresentationSummary } from "@roomwave/shared";
+  import { PLANS, TEMPLATES, formatJoinCode, type PresentationSummary } from "@roomwave/shared";
   import { THEMES_BY_ID, themeStyle } from "@roomwave/ui";
 
   import { del, get, post, RequestError } from "#lib/api.ts";
@@ -44,6 +44,18 @@
       return true;
     }
     return false;
+  }
+
+  // A full Free plan says so before a template is picked; the server checks again either way.
+  function startNew() {
+    const plan = session.user?.plan.plan;
+    const limit = plan ? PLANS[plan].presentations : null;
+    if (limit !== null && presentations && presentations.length >= limit) {
+      limitMessage = `The Free plan holds ${limit} presentations. Delete one, or start a Pro trial for unlimited presentations.`;
+      limitOpen = true;
+      return;
+    }
+    choosing = true;
   }
 
   async function create(template: string) {
@@ -129,7 +141,7 @@
       </p>
     {/if}
   </div>
-  <button class="btn btn-signal" type="button" onclick={() => (choosing = true)}><Icon name="plus" size={18} /> New presentation</button>
+  <button class="btn btn-signal" type="button" onclick={startNew}><Icon name="plus" size={18} /> New presentation</button>
 </div>
 
 {#if loadError}
@@ -145,7 +157,7 @@
   <div class="empty">
     <h2>Nothing here yet</h2>
     <p>Start from a template or a blank page. Your first question takes a minute.</p>
-    <button class="btn btn-signal btn-large" type="button" onclick={() => (choosing = true)}><Icon name="plus" size={18} /> New presentation</button>
+    <button class="btn btn-signal btn-large" type="button" onclick={startNew}><Icon name="plus" size={18} /> New presentation</button>
   </div>
 {:else}
   <ul class="grid">
@@ -195,7 +207,7 @@
         <button type="button" class="template" disabled={creating !== null} onclick={() => create(template.id)} style={themeStyle(THEMES_BY_ID[template.theme])}>
           <span class="swatch" aria-hidden="true">
             <span class="swatch-glow"></span>
-            <span class="swatch-count">{template.slides.length}</span>
+            <span class="swatch-count">{template.slides.length}<small>{template.slides.length === 1 ? "slide" : "slides"}</small></span>
           </span>
           <span class="template-text">
             <strong>{template.name}</strong>
@@ -486,10 +498,22 @@
   }
 
   .swatch-count {
+    display: grid;
+    justify-items: center;
     font-family: var(--font-display);
     font-size: 1.4rem;
     font-weight: 700;
+    line-height: 1;
     color: var(--t-accent);
+  }
+
+  .swatch-count small {
+    margin-top: 3px;
+    font-family: var(--font-text);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    color: var(--t-muted);
   }
 
   .template-text {

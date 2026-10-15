@@ -6,7 +6,7 @@
 
   import { post } from "#lib/api.ts";
   import PasswordField from "#lib/components/PasswordField.svelte";
-  import { check, describe } from "#lib/forms.ts";
+  import { check, clearEdited, describe } from "#lib/forms.ts";
   import { session } from "#lib/session.svelte.ts";
 
   let name = $state("");
@@ -50,7 +50,7 @@
 <h1>Create your account</h1>
 <p class="sub">Free for rooms of up to 50 people. No card, no app for your audience.</p>
 
-<form onsubmit={submit} novalidate>
+<form onsubmit={submit} oninput={(event) => (errors = clearEdited(errors, event))} novalidate>
   {#if message}<p class="notice notice-error form-notice" role="alert">{message}</p>{/if}
 
   <div class="field">

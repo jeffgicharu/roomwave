@@ -7,7 +7,11 @@
     <div class="toast {toast.tone}">
       <span class="dot" aria-hidden="true"></span>
       <span class="message">{toast.message}</span>
-      <button type="button" aria-label="Dismiss" onclick={() => toasts.dismiss(toast.id)}>×</button>
+      {#if toast.action}
+        {@const action = toast.action}
+        <button type="button" class="action" onclick={() => { toasts.dismiss(toast.id); action.run(); }}>{action.label}</button>
+      {/if}
+      <button type="button" class="close" aria-label="Dismiss" onclick={() => toasts.dismiss(toast.id)}>×</button>
     </div>
   {/each}
 </div>
@@ -60,7 +64,23 @@
     flex: 1;
   }
 
-  button {
+  .action {
+    flex: none;
+    padding: 6px 12px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--stage-2);
+    color: var(--paper);
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .action:hover {
+    background: var(--signal);
+    color: var(--ink);
+  }
+
+  .close {
     flex: none;
     width: 30px;
     height: 30px;
@@ -73,7 +93,7 @@
     cursor: pointer;
   }
 
-  button:hover {
+  .close:hover {
     background: var(--stage-2);
     color: var(--paper);
   }

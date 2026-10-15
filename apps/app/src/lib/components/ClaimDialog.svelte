@@ -2,7 +2,7 @@
   import { signUpSchema, type User } from "@roomwave/shared";
 
   import { post } from "../api.ts";
-  import { check, describe } from "../forms.ts";
+  import { check, clearEdited, describe } from "../forms.ts";
   import { session } from "../session.svelte.ts";
   import { toasts } from "../toast.svelte.ts";
   import Dialog from "./Dialog.svelte";
@@ -41,7 +41,7 @@
 </script>
 
 <Dialog bind:open title="Keep your workspace" description="Add your name, email and a password. Everything you made as a guest stays.">
-  <form id="claim-form" onsubmit={submit} novalidate>
+  <form id="claim-form" onsubmit={submit} oninput={(event) => (errors = clearEdited(errors, event))} novalidate>
     {#if message}<p class="notice notice-error" role="alert">{message}</p>{/if}
     <div class="field">
       <label class="label" for="claim-name">Your name</label>

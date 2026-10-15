@@ -14,11 +14,27 @@
   let formMessage = $state("");
   let busy = $state(false);
   let sent = $state(false);
+  let thanks: HTMLDivElement | undefined = $state();
+
+  // The thank-you takes the form's place; bring it into view, as the page was scrolled to the button.
+  $effect(() => {
+    if (!thanks) return;
+    thanks.focus({ preventScroll: true });
+    thanks.scrollIntoView({ block: "center", behavior: "smooth" });
+  });
 
   onMount(() => {
     const asked = new URLSearchParams(location.search).get("topic");
     if (asked && (CONTACT_TOPICS as readonly string[]).includes(asked)) topic = asked as Topic;
   });
+
+  // A field's message goes as soon as the person edits that field.
+  function clearEdited(event: Event) {
+    const key = (event.target as HTMLElement).id.replace(/^c-/, "");
+    if (!(key in errors)) return;
+    const { [key]: _edited, ...rest } = errors;
+    errors = rest;
+  }
 
   async function submit(event: SubmitEvent) {
     event.preventDefault();
@@ -57,12 +73,12 @@
 </script>
 
 {#if sent}
-  <div class="sent" role="status">
+  <div class="sent" role="status" tabindex="-1" bind:this={thanks}>
     <p class="big">Thank you, {name.split(" ")[0]}.</p>
     <p>Your message is with our team. We usually reply within one working day, to <strong>{email}</strong>.</p>
   </div>
 {:else}
-  <form onsubmit={submit} novalidate>
+  <form onsubmit={submit} oninput={clearEdited} novalidate>
     {#if formMessage}<p class="notice notice-error" role="alert">{formMessage}</p>{/if}
     <div class="row">
       <div class="field">
@@ -78,8 +94,8 @@
     </div>
     <div class="row">
       <div class="field">
-        <label class="label" for="c-org">Organisation <span class="optional">(optional)</span></label>
-        <input id="c-org" class="input" autocomplete="organization" bind:value={organisation} aria-invalid={errors.organisation ? "true" : undefined} />
+        <label class="label" for="c-organisation">Organisation <span class="optional">(optional)</span></label>
+        <input id="c-organisation" class="input" autocomplete="organization" bind:value={organisation} aria-invalid={errors.organisation ? "true" : undefined} />
         {#if errors.organisation}<p class="field-error">{errors.organisation}</p>{/if}
       </div>
       <div class="field">
@@ -138,6 +154,10 @@
     padding: 32px;
     border-radius: var(--radius-l);
     background: var(--lagoon-soft);
+  }
+
+  .sent:focus {
+    outline: none;
   }
 
   .big {

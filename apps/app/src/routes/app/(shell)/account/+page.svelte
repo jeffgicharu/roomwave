@@ -6,7 +6,7 @@
   import Dialog from "#lib/components/Dialog.svelte";
   import PasswordField from "#lib/components/PasswordField.svelte";
   import { formatDate } from "#lib/format.ts";
-  import { check, describe } from "#lib/forms.ts";
+  import { check, clearEdited, describe } from "#lib/forms.ts";
   import { session } from "#lib/session.svelte.ts";
   import { toasts } from "#lib/toast.svelte.ts";
 
@@ -108,7 +108,7 @@
         <h2>Your details</h2>
         <p>The name and email on your account. Reports are sent to this email.</p>
       </div>
-      <form onsubmit={saveProfile} novalidate>
+      <form onsubmit={saveProfile} oninput={(event) => (profileErrors = clearEdited(profileErrors, event))} novalidate>
         {#if profileMessage}<p class="notice notice-error" role="alert">{profileMessage}</p>{/if}
         <div class="field">
           <label class="label" for="name">Name</label>
@@ -129,7 +129,7 @@
         <h2>Password</h2>
         <p>Changing it signs you out on every other device.</p>
       </div>
-      <form onsubmit={savePassword} novalidate>
+      <form onsubmit={savePassword} oninput={(event) => (passwordErrors = clearEdited(passwordErrors, event))} novalidate>
         {#if passwordMessage}<p class="notice notice-error" role="alert">{passwordMessage}</p>{/if}
         <PasswordField id="current" label="Current password" bind:value={current} error={passwordErrors.current} autocomplete="current-password" />
         <PasswordField id="next" label="New password" bind:value={next} error={passwordErrors.next} hint="At least 10 characters." autocomplete="new-password" />
@@ -152,7 +152,7 @@
 </div>
 
 <Dialog bind:open={deleting} title={user.isGuest ? "Delete this workspace?" : "Delete your account?"} description="This cannot be undone.">
-  <form id="delete-form" onsubmit={deleteAccount} novalidate>
+  <form id="delete-form" onsubmit={deleteAccount} oninput={() => (deleteError = "")} novalidate>
     {#if !user.isGuest}
       <PasswordField id="delete-password" label="Type your password to confirm" bind:value={deletePassword} error={deleteError} autocomplete="current-password" />
     {:else if deleteError}
@@ -213,7 +213,8 @@
     justify-self: start;
   }
 
-  .field + .field {
+  /* The form's own gap spaces the fields, the password ones included. */
+  form :global(.field + .field) {
     margin-top: 0;
   }
 

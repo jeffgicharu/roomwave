@@ -166,12 +166,12 @@
     {:else if slide.type === "wordcloud"}
       <div class="field">
         <Segmented
-          label="Words each person can send"
+          label="Answers each person can send"
           name={`${id}-entries`}
           bind:value={slide.config.maxEntries}
           options={[1, 2, 3].map((n) => ({ value: n, label: String(n) }))}
         />
-        <span class="hint">Offensive words are refused before they reach the screen.</span>
+        <span class="hint">Each answer can be up to three words. Offensive words are refused before they reach the screen.</span>
       </div>
     {:else if slide.type === "scale"}
       <div class="field">

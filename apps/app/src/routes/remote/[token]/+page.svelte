@@ -162,7 +162,7 @@
           <li>
             <button type="button" class:current={i === view.slideIndex} onclick={() => send("go", { index: i })}>
               <span class="n">{i + 1}</span>
-              <span class="t"><small>{SLIDE_TYPE_LABELS[s.type]}</small>{slideTitle(s) || "Untitled"}</span>
+              <span class="t"><small>{SLIDE_TYPE_LABELS[s.type]}</small><span class="name">{slideTitle(s) || "Untitled"}</span></span>
             </button>
           </li>
         {/each}
@@ -329,7 +329,7 @@
 
   .slides button {
     display: grid;
-    grid-template-columns: 28px 1fr;
+    grid-template-columns: 28px minmax(0, 1fr);
     align-items: center;
     gap: 8px;
     width: 100%;
@@ -354,8 +354,12 @@
 
   .slides .t {
     display: grid;
-    overflow: hidden;
+    min-width: 0;
     font-weight: 600;
+  }
+
+  .slides .name {
+    overflow: hidden;
     white-space: nowrap;
     text-overflow: ellipsis;
   }

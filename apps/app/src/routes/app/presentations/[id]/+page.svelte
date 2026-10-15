@@ -263,9 +263,10 @@
     text-align: center;
   }
 
+  /* A column, so the slide area fills what is left whichever notices are showing above it. */
   .editor {
-    display: grid;
-    grid-template-rows: auto auto auto 1fr;
+    display: flex;
+    flex-direction: column;
     height: 100dvh;
     background: var(--paper);
   }
@@ -397,6 +398,7 @@
   }
 
   .body {
+    flex: 1;
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr) 360px;
     min-height: 0;

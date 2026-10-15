@@ -6,7 +6,7 @@
 
   import { post } from "#lib/api.ts";
   import PasswordField from "#lib/components/PasswordField.svelte";
-  import { check, describe } from "#lib/forms.ts";
+  import { check, clearEdited, describe } from "#lib/forms.ts";
   import { session } from "#lib/session.svelte.ts";
   import { toasts } from "#lib/toast.svelte.ts";
 
@@ -64,7 +64,7 @@
   <h1>Choose a new password</h1>
   <p class="sub">You will be signed in on this device, and signed out everywhere else.</p>
 
-  <form onsubmit={submit} novalidate>
+  <form onsubmit={submit} oninput={(event) => (errors = clearEdited(errors, event))} novalidate>
     {#if message}<p class="notice notice-error form-notice" role="alert">{message}</p>{/if}
     <PasswordField
       id="password"

@@ -96,8 +96,10 @@
         </li>
       {/each}
     </ul>
+    <!-- Both lines share one cell, so the box is as tall as the longer one and nothing below it moves after a vote. -->
     <p class="note">
-      {#if mine}Your vote is in, and you are watching everyone else's arrive. Tap another answer to change it.{:else}Tap an answer. You'll see it land, along with everyone else's.{/if}
+      <span class:shown={!mine}>Tap an answer. You'll see it land, along with everyone else's.</span>
+      <span class:shown={Boolean(mine)}>Your vote is in, and you are watching everyone else's arrive. Tap another answer to change it.</span>
     </p>
   {/if}
 </div>
@@ -230,9 +232,18 @@
   }
 
   .note {
-    min-height: 2.9em;
+    display: grid;
     font-size: 0.9rem;
     color: var(--stage-muted);
+  }
+
+  .note span {
+    grid-area: 1 / 1;
+    visibility: hidden;
+  }
+
+  .note span.shown {
+    visibility: visible;
   }
 
   .skeleton {

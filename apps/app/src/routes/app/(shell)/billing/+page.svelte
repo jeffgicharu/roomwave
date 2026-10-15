@@ -87,7 +87,7 @@
         {#if plan.monthly === null}
           <strong>Quoted</strong> <span>for your event or team</span>
         {:else if plan.monthly === 0}
-          <strong>KSh 0</strong> <span>for ever</span>
+          <strong>KSh&nbsp;0</strong> <span>for ever</span>
         {:else}
           <strong>{formatShillings(plan.yearly!)}</strong> <span>a month, paid yearly, or {formatShillings(plan.monthly)} monthly</span>
         {/if}

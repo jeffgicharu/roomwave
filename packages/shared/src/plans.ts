@@ -77,6 +77,7 @@ export function effectivePlan(
   };
 }
 
+/** A price such as "KSh 1,500", with a space that never breaks the line between the two. */
 export function formatShillings(amount: number): string {
-  return `KSh ${amount.toLocaleString("en-KE")}`;
+  return `KSh\u00a0${amount.toLocaleString("en-KE")}`;
 }
