@@ -29,13 +29,13 @@
 
 <div class="shell">
   {#if user.isGuest}
-    <div class="guest-bar">
+    <section class="guest-bar" aria-label="Guest workspace">
       <p>
         <strong>You are trying Roomwave as a guest.</strong>
         This workspace is deleted {user.guestExpiresAt ? timeAgo(user.guestExpiresAt) : "tomorrow"}.
       </p>
       <button class="btn btn-small btn-signal" type="button" onclick={() => (claiming = true)}>Keep it: create an account</button>
-    </div>
+    </section>
   {/if}
 
   <header class="top">

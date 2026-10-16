@@ -213,13 +213,14 @@
       </div>
     {/if}
 
-    <div class="body">
-      <aside class="list" aria-label="Slides">
+    <main id="main" class="body">
+      <h1 class="visually-hidden">{title || "Untitled presentation"}</h1>
+      <section class="list" aria-label="Slides">
         <SlideList bind:slides bind:selected />
         {#if unfinished}
           <p class="unfinished"><span class="dot"></span> {unfinished} {unfinished === 1 ? "slide needs" : "slides need"} finishing</p>
         {/if}
-      </aside>
+      </section>
 
       <section class="preview" aria-label="Preview">
         <div class="preview-bar">
@@ -243,12 +244,12 @@
         <p class="hint">This is how the slide looks on the big screen. People answer on their phones.</p>
       </section>
 
-      <aside class="inspector" aria-label="Edit slide">
+      <section class="inspector" aria-label="Edit slide">
         {#key current.id}
           <Inspector bind:slide={slides[selected] as Slide} number={selected + 1} />
         {/key}
-      </aside>
-    </div>
+      </section>
+    </main>
   </div>
 {/if}
 

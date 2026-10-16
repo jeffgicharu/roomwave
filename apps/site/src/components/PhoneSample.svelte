@@ -83,7 +83,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: #c4410c;
+    color: var(--signal-strong);
   }
 
   .q {

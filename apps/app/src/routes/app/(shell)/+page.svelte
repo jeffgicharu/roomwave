@@ -510,7 +510,7 @@
     font-size: 1.4rem;
     font-weight: 700;
     line-height: 1;
-    color: var(--t-accent);
+    color: var(--t-accent-text);
   }
 
   .swatch-count small {

@@ -28,7 +28,7 @@
 
   /* Accents. Signal orange is the brand; the rest are for charts and states. */
   --signal: #ff6a2b;
-  --signal-strong: #c4410c; /* readable as text on paper */
+  --signal-strong: #b13a0a; /* readable as text on paper and on signal-soft */
   --signal-soft: #ffe2d3;
   --sun: #ffc23d;
   --sun-soft: #fff1cc;

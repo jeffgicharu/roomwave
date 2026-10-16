@@ -578,7 +578,7 @@
     font-weight: 700;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--t-accent);
+    color: var(--t-accent-text);
   }
 
   .q {
@@ -842,7 +842,7 @@
     padding: 0;
     border: 0;
     background: none;
-    color: var(--t-accent);
+    color: var(--t-accent-text);
     font-weight: 700;
     text-decoration: underline;
     cursor: pointer;

@@ -12,6 +12,8 @@ export interface Theme {
   muted: string;
   line: string;
   accent: string;
+  /** The accent as small text on the background: at least 4.5:1. */
+  accentText: string;
   /** Text on the accent colour. */
   onAccent: string;
   track: string;
@@ -32,6 +34,7 @@ export const THEME_LIST: Theme[] = [
     muted: "#6b6079",
     line: "#e6dccd",
     accent: "#ff6a2b",
+    accentText: "#b13a0a",
     onAccent: "#1d1430",
     track: "#f1e9dc",
     correct: "#14a098",
@@ -48,6 +51,7 @@ export const THEME_LIST: Theme[] = [
     muted: "#b4a9c4",
     line: "#3b3052",
     accent: "#ff7a3d",
+    accentText: "#ff7a3d",
     onAccent: "#160f24",
     track: "#2c2340",
     correct: "#2bc4b6",
@@ -64,6 +68,7 @@ export const THEME_LIST: Theme[] = [
     muted: "#a3cbc5",
     line: "#1d5c58",
     accent: "#ffc845",
+    accentText: "#ffc845",
     onAccent: "#0a3533",
     track: "#11504c",
     correct: "#7fe0d4",
@@ -80,6 +85,7 @@ export const THEME_LIST: Theme[] = [
     muted: "#7d4c33",
     line: "#f2c9a3",
     accent: "#e8452c",
+    accentText: "#b8321b",
     onAccent: "#ffffff",
     track: "#fbd9b5",
     correct: "#0b6f69",
@@ -98,6 +104,7 @@ export function themeStyle(theme: Theme): string {
     `--t-muted:${theme.muted}`,
     `--t-line:${theme.line}`,
     `--t-accent:${theme.accent}`,
+    `--t-accent-text:${theme.accentText}`,
     `--t-on-accent:${theme.onAccent}`,
     `--t-track:${theme.track}`,
     `--t-correct:${theme.correct}`,

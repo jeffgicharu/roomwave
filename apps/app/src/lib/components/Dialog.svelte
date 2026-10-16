@@ -14,6 +14,8 @@
   let { open = $bindable(), title, description, wide = false, onclose, children, actions }: Props = $props();
 
   let dialog: HTMLDialogElement | undefined = $state();
+  // Several dialogs can sit on one page, so each names itself with its own ids.
+  const uid = $props.id();
 
   // The browser's own modal dialog: focus is held inside it, Escape closes it,
   // and everything behind it is inert.
@@ -32,7 +34,8 @@
 <dialog
   bind:this={dialog}
   class:wide
-  aria-labelledby="dialog-title"
+  aria-labelledby={`${uid}-title`}
+  aria-describedby={description ? `${uid}-description` : undefined}
   onclose={closed}
   onclick={(event) => {
     if (event.target === dialog) open = false;
@@ -40,12 +43,12 @@
 >
   <div class="panel">
     <header>
-      <h2 id="dialog-title">{title}</h2>
+      <h2 id={`${uid}-title`}>{title}</h2>
       <button type="button" class="close" aria-label="Close" onclick={() => (open = false)}>
         <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 4l8 8M12 4l-8 8" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" /></svg>
       </button>
     </header>
-    {#if description}<p class="description">{description}</p>{/if}
+    {#if description}<p class="description" id={`${uid}-description`}>{description}</p>{/if}
     <div class="body">{@render children()}</div>
     {#if actions}<footer>{@render actions()}</footer>{/if}
   </div>

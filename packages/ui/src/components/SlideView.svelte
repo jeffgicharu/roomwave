@@ -66,7 +66,7 @@
 </script>
 
 <div class="frame" style={themeStyle(theme)}>
-<section class="stage" class:thumbnail class:dark={theme.dark} aria-label="Slide">
+<div class="stage" class:thumbnail class:dark={theme.dark} role="group" aria-label="Slide">
   <div class="glow" aria-hidden="true"></div>
 
   {#if slide.type === "content"}
@@ -171,7 +171,7 @@
       {#if slideState.locked}<span class="locked">Answers closed</span>{/if}
     </footer>
   {/if}
-</section>
+</div>
 </div>
 
 <style>
@@ -226,7 +226,7 @@
     font-weight: 600;
     letter-spacing: 0.12em;
     text-transform: uppercase;
-    color: var(--t-accent);
+    color: var(--t-accent-text);
   }
 
   .question {
