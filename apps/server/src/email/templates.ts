@@ -47,6 +47,11 @@ This mailbox does not receive replies. If you need help, write to us from <a hre
 </html>`;
 }
 
+/** "1 person", "1,240 people": the number with the right word after it. */
+function count(n: number, one: string, many: string): string {
+  return `${n.toLocaleString("en-KE")} ${n === 1 ? one : many}`;
+}
+
 function button(href: string, label: string): string {
   return `<table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0;"><tr><td style="background:${SIGNAL};border-radius:999px;">
 <a href="${href}" style="display:inline-block;padding:13px 26px;font-family:Arial,Helvetica,sans-serif;font-size:16px;font-weight:bold;color:${INK};text-decoration:none;">${escape(label)}</a>
@@ -90,8 +95,8 @@ export function sessionReportEmail(
     `<p style="margin:0 0 16px;font-size:20px;font-weight:bold;">Hello ${escape(name)},</p>
 <p style="margin:0 0 16px;">Here are the results of <strong>${escape(title)}</strong>, presented on ${date}. The full report is attached as a PDF.</p>
 <table role="presentation" cellpadding="0" cellspacing="0" style="margin:0 0 8px;"><tr>
-<td style="padding:12px 20px 12px 0;"><div style="font-size:28px;font-weight:bold;">${participants}</div><div style="color:${MUTED};font-size:14px;">people took part</div></td>
-<td style="padding:12px 0 12px 20px;border-left:1px solid ${LINE};"><div style="font-size:28px;font-weight:bold;">${responses}</div><div style="color:${MUTED};font-size:14px;">answers given</div></td>
+<td style="padding:12px 20px 12px 0;"><div style="font-size:28px;font-weight:bold;">${participants.toLocaleString("en-KE")}</div><div style="color:${MUTED};font-size:14px;">${participants === 1 ? "person" : "people"} took part</div></td>
+<td style="padding:12px 0 12px 20px;border-left:1px solid ${LINE};"><div style="font-size:28px;font-weight:bold;">${responses.toLocaleString("en-KE")}</div><div style="color:${MUTED};font-size:14px;">${responses === 1 ? "answer" : "answers"} given</div></td>
 </tr></table>
 ${button(resultsUrl, "Open the results")}`,
   );
@@ -99,7 +104,7 @@ ${button(resultsUrl, "Open the results")}`,
 
 Here are the results of "${title}", presented on ${date}. The full report is attached as a PDF.
 
-${participants} people took part and gave ${responses} answers.
+${count(participants, "person", "people")} took part and gave ${count(responses, "answer", "answers")}.
 
 Open the results: ${resultsUrl}
 
