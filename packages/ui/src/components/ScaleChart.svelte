@@ -66,7 +66,7 @@
     font-weight: 700;
     letter-spacing: -0.04em;
     line-height: 0.9;
-    color: var(--t-accent, var(--signal));
+    color: var(--t-accent-text, var(--signal-strong));
     font-variant-numeric: tabular-nums;
   }
 

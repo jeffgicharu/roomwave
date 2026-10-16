@@ -740,7 +740,7 @@
   .sent {
     margin-top: 14px;
     font-weight: 600;
-    color: var(--t-correct);
+    color: var(--t-correct-text);
   }
 
   .scale {

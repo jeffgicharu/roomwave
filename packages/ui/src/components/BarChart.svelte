@@ -251,15 +251,20 @@
     vertical-align: 0.1em;
   }
 
-  .wrong {
-    opacity: 0.55;
+  /* Wrong answers fade their bars; their words stay readable. */
+  .wrong .track {
+    opacity: 0.45;
+  }
+
+  .wrong .label {
+    color: var(--t-muted, var(--ink-3));
   }
 
   .correct .label {
-    color: var(--t-correct, #14a098);
+    color: var(--t-correct-text, var(--lagoon-strong));
   }
 
-  .revealed .item {
+  .revealed .track {
     transition: opacity 300ms ease;
   }
 </style>

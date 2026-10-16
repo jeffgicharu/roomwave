@@ -18,6 +18,8 @@ export interface Theme {
   onAccent: string;
   track: string;
   correct: string;
+  /** The correct-answer colour as small text on the background: at least 4.5:1. */
+  correctText: string;
   /** Six chart colours in a fixed order, validated for colour-blind separation and contrast on this background. */
   chart: string[];
 }
@@ -38,6 +40,7 @@ export const THEME_LIST: Theme[] = [
     onAccent: "#1d1430",
     track: "#f1e9dc",
     correct: "#14a098",
+    correctText: "#0b6f69",
     chart: ["#f25c1f", "#0f9890", "#6b5cff", "#c27f00", "#e0407a", "#2a86d6"],
   },
   {
@@ -55,6 +58,7 @@ export const THEME_LIST: Theme[] = [
     onAccent: "#160f24",
     track: "#2c2340",
     correct: "#2bc4b6",
+    correctText: "#2bc4b6",
     chart: ["#e96626", "#0eaa9d", "#8f80f2", "#ba8c00", "#ea5889", "#469bdc"],
   },
   {
@@ -72,6 +76,7 @@ export const THEME_LIST: Theme[] = [
     onAccent: "#0a3533",
     track: "#11504c",
     correct: "#7fe0d4",
+    correctText: "#7fe0d4",
     chart: ["#ba8c00", "#0eaa9d", "#e96626", "#8f80f2", "#ea5889", "#469bdc"],
   },
   {
@@ -89,6 +94,7 @@ export const THEME_LIST: Theme[] = [
     onAccent: "#ffffff",
     track: "#fbd9b5",
     correct: "#0b6f69",
+    correctText: "#0b6f69",
     chart: ["#d8401f", "#0b8f87", "#6b5cff", "#a86f00", "#c2307a", "#2f74c0"],
   },
 ];
@@ -108,6 +114,7 @@ export function themeStyle(theme: Theme): string {
     `--t-on-accent:${theme.onAccent}`,
     `--t-track:${theme.track}`,
     `--t-correct:${theme.correct}`,
+    `--t-correct-text:${theme.correctText}`,
     ...theme.chart.map((color, i) => `--t-c${i}:${color}`),
   ].join(";");
 }
