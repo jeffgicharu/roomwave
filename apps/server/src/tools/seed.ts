@@ -5,6 +5,7 @@ import { sql } from "kysely";
 
 import {
   newId,
+  PLANS,
   presentationFromTemplate,
   quizPoints,
   templateById,
@@ -131,7 +132,7 @@ async function seedSampleSession(ownerId: string, presentationId: string, slides
       slides: JSON.stringify(slides),
       slide_states: JSON.stringify({}),
       remote_token: newToken(24),
-      participant_limit: 2000,
+      participant_limit: PLANS.organisation.participants,
       started_at: startedAt,
       ended_at: endedAt,
       last_activity_at: endedAt,

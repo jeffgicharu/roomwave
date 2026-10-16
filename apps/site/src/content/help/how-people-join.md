@@ -24,4 +24,4 @@ Phones reconnect by themselves and catch up with the current slide. A person who
 
 ## How many people can join
 
-Each plan has a limit on the number of people in one session: 50 on Free, 500 on Pro and 2,000 on Organisation. When a session is full, the next phone is told so politely, and you see it on your screen.
+Each plan has a limit on the number of people in one session: 50 on Free, 500 on Pro and 1,000 on Organisation. When a session is full, the next phone is told so politely, and you see it on your screen.

@@ -43,7 +43,7 @@ export const PLANS: Record<PlanId, Plan> = {
     name: "Organisation",
     monthly: null,
     yearly: null,
-    participants: 2000,
+    participants: 1000,
     presentations: null,
     pdfReports: true,
     emailReports: true,

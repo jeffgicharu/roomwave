@@ -1,5 +1,7 @@
 import type { ImageMetadata } from "astro";
 
+import { PLANS } from "@roomwave/shared";
+
 import communityHall from "../assets/photos/community-hall.jpg";
 import lectureTheatre from "../assets/photos/lecture-theatre.jpg";
 import panel from "../assets/photos/panel-discussion.jpg";
@@ -23,7 +25,7 @@ export const USE_CASES: UseCase[] = [
     slug: "conferences",
     name: "Conferences and panels",
     title: "Let the whole hall ask the panel.",
-    description: "Moderated Q&A with upvotes, live polls between talks and session feedback for conferences and panels of up to 2,000 people.",
+    description: `Moderated Q&A with upvotes, live polls between talks and session feedback for conferences and panels of up to ${PLANS.organisation.participants.toLocaleString("en-KE")} people.`,
     lead: "In a hall of four hundred, the same three people take the microphone. With Roomwave, everyone sends questions from their seat and the room decides which ones matter.",
     image: panel,
     alt: "A panel of four speakers with microphones on a conference stage",
