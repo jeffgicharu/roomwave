@@ -29,13 +29,13 @@
 
 {#if rows.length}
   <section class="mini" aria-label="Results so far">
-    <h3>
+    <h2>
       {#if results?.type === "scale" && results.average !== null}
         Average {results.average.toFixed(1)}
       {:else}
         The room so far
       {/if}
-    </h3>
+    </h2>
     <ul class:compact={slide.type === "scale"}>
       {#each rows as row (row.label)}
         <li style={`--share:${row.count / most};--any:${row.count ? 1 : 0};--c:${row.color}`}>
@@ -57,7 +57,7 @@
     border: 1px solid var(--t-line);
   }
 
-  h3 {
+  h2 {
     margin-bottom: 12px;
     font-size: 1rem;
     letter-spacing: -0.01em;
