@@ -44,6 +44,7 @@
     justify-self: start;
     display: inline-flex;
     color: var(--ink);
+    text-decoration: none;
   }
 
   .inner {
