@@ -21,7 +21,7 @@
     ],
     organisation: [
       `Up to ${PLANS.organisation.participants.toLocaleString("en-KE")} people in a session`,
-      "Pay by invoice, bank transfer or M-Pesa paybill",
+      "Pay by invoice, bank transfer or M-\u2060Pesa paybill",
       "PDF reports, emailed to you",
       "Help before and during your event",
     ],

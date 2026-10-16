@@ -59,7 +59,7 @@
     {#if status.onTrial && status.trialEndsAt}
       <p>Your Pro trial ends on {formatDate(status.trialEndsAt)}, in {daysLeft(status.trialEndsAt)} days. After that you are back on Free, and nothing you made is lost.</p>
     {:else if status.plan === "free" && status.trialUsed}
-      <p>Your Pro trial has ended. To keep Pro, ask us for an invoice; most teams pay by bank transfer or M-Pesa paybill.</p>
+      <p>Your Pro trial has ended. To keep Pro, ask us for an invoice; most teams pay by bank transfer or M-&#8288;Pesa paybill.</p>
     {:else if status.plan === "free"}
       <p>Free holds rooms of up to {PLANS.free.participants} people and {PLANS.free.presentations} presentations. Try everything in Pro for {TRIAL_DAYS} days, without a card.</p>
     {:else}

@@ -15,7 +15,7 @@ From **Plan** in your account, start a 14-day Pro trial. There is no card to ent
 
 ## Paying for Pro or Organisation
 
-Roomwave is paid by invoice. Most teams pay by bank transfer or M-Pesa paybill, monthly or for the year (two months free). Ask for an invoice from the [contact page](/contact?topic=invoice) and tell us the name on the account.
+Roomwave is paid by invoice. Most teams pay by bank transfer or M-&#8288;Pesa paybill, monthly or for the year (two months free). Ask for an invoice from the [contact page](/contact?topic=invoice) and tell us the name on the account.
 
 ## Events
 
