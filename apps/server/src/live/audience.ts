@@ -37,6 +37,18 @@ import { currentSlide, findOpenSessionByCode, getSession, liveView, stateOf, tou
 type AudienceSocket = Socket<AudienceClientEvents, AudienceServerEvents, Record<string, never>, AudienceData>;
 
 /**
+ * Why phone connections ended, summed and logged once a minute. A room leaving
+ * at the end shows as "client namespace disconnect"; a network that drops a
+ * phone, or a phone that stops answering pings, as "transport close" or "ping timeout".
+ */
+const closedBecause = new Map<string, number>();
+setInterval(() => {
+  if (!closedBecause.size) return;
+  console.log(`phone connections closed in the last minute: ${[...closedBecause].map(([why, n]) => `${n} ${why}`).join(", ")}`);
+  closedBecause.clear();
+}, 60_000).unref();
+
+/**
  * Twenty messages in five seconds is more than any person taps. A whole hall
  * often shares one public address, so the limit is per connection, never per address.
  */
@@ -159,7 +171,8 @@ export function registerAudience(ns: AudienceNamespace): void {
       ack({ ok: true });
     });
 
-    socket.on("disconnect", () => {
+    socket.on("disconnect", (reason) => {
+      closedBecause.set(reason, (closedBecause.get(reason) ?? 0) + 1);
       const { sessionId, participantId } = socket.data;
       if (!sessionId || !participantId) return;
       // Another tab on this process may still hold the same participant.
