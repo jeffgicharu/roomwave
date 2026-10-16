@@ -45,6 +45,7 @@
 </nav>
 
 {#if message}
+  <h1 class="visually-hidden">Results</h1>
   <p class="notice notice-error" role="alert">{message}</p>
 {:else if !presentation || !sessions}
   <p class="loading" aria-busy="true">Loading…</p>

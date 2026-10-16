@@ -104,6 +104,7 @@
 </nav>
 
 {#if message}
+  <h1 class="visually-hidden">Session results</h1>
   <p class="notice notice-error" role="alert">{message}</p>
 {:else if !data}
   <p class="loading" aria-busy="true">Loading…</p>
