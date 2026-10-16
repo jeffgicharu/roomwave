@@ -15,7 +15,11 @@
 
   let open = $state(false);
   let root: HTMLDivElement | undefined = $state();
-  const close = () => (open = false);
+  // Choosing an item hands focus back to the button, so the keyboard does not fall to the top of the page.
+  const close = () => {
+    open = false;
+    root?.querySelector<HTMLButtonElement>("button")?.focus();
+  };
 
   $effect(() => {
     if (!open) return;

@@ -1,4 +1,6 @@
 <script lang="ts">
+  import { tick } from "svelte";
+
   import { LIMITS, SLIDE_TYPES, SLIDE_TYPE_LABELS, blankSlide, newId, slideProblems, slideTitle, type Slide, type SlideType } from "@roomwave/shared";
 
   import Icon from "../components/Icon.svelte";
@@ -25,11 +27,15 @@
   let dragging = $state<number | null>(null);
   let over = $state<number | null>(null);
 
-  function add(type: SlideType) {
+  async function add(type: SlideType) {
     if (slides.length >= LIMITS.slides) return;
     const at = selected + 1;
-    slides.splice(at, 0, blankSlide(type));
+    const slide = blankSlide(type);
+    slides.splice(at, 0, slide);
     selected = at;
+    // The menu that chose the kind has gone, so put the cursor in the new slide's first box.
+    await tick();
+    (document.getElementById(`${slide.id}-question`) ?? document.getElementById(`${slide.id}-heading`))?.focus();
   }
 
   function duplicate(index: number) {
@@ -49,6 +55,8 @@
     if (slides.length <= 1) return;
     const [gone] = slides.splice(index, 1);
     selected = Math.max(0, Math.min(selected, slides.length - 1));
+    // The deleted slide took its menu button with it; carry on from the slide now selected.
+    void tick().then(() => document.querySelectorAll<HTMLButtonElement>(".slides .pick")[selected]?.focus());
     // A slip of the finger should not cost a slide: it can come back for a few seconds.
     toasts.show(`Slide ${index + 1} deleted.`, "info", 8000, {
       label: "Undo",
@@ -125,7 +133,7 @@
     {#snippet trigger()}<Icon name="plus" size={18} /> Add a slide{/snippet}
     {#snippet children(close)}
       {#each SLIDE_TYPES as type (type)}
-        <button type="button" class="type-choice" onclick={() => { close(); add(type); }}>
+        <button type="button" class="type-choice" onclick={() => { close(); void add(type); }}>
           <span class="type-icon"><TypeIcon {type} size={20} /></span>
           <span class="type-text"><strong>{SLIDE_TYPE_LABELS[type]}</strong><span>{DESCRIPTIONS[type]}</span></span>
         </button>
