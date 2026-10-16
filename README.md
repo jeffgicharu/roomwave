@@ -47,8 +47,11 @@ Checks:
 
 ```sh
 pnpm typecheck
+pnpm lint
 pnpm test         # unit tests, and live-session tests against a real PostgreSQL and Redis
 ```
+
+A room full of phones can be simulated from another machine with `apps/server/src/tools/load-test.ts` (usage at the top of the file). It joins phones at a set rate, answers every slide, and reports how long answers take to reach the presenter's screen.
 
 ## Releasing
 

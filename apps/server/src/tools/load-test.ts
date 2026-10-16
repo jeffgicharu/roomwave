@@ -196,7 +196,10 @@ async function main(): Promise<void> {
     // The room fills up.
     const joinTimes: number[] = [];
     let refused = 0;
-    let dropped = 0;
+    /** What the room is doing, so a dropped connection can be placed. */
+    let phase = "filling";
+    const drops: { phase: string; reason: string }[] = [];
+    let rejoined = 0;
     const phones: Phone[] = [];
     const filling = now();
     for (let i = 0; i < phoneCount; i++) {
@@ -206,13 +209,26 @@ async function main(): Promise<void> {
         transports: ["websocket"],
         extraHeaders: { origin, "user-agent": USER_AGENT },
       });
-      phone.on("disconnect", () => (dropped += 1));
+      let token: string | null = null;
+      phone.on("disconnect", (reason) => drops.push({ phase, reason }));
+      // Like the phone page, join again with the same token after a reconnect, as the same person.
+      phone.io.on("reconnect", () => {
+        phone
+          .timeout(30_000)
+          .emitWithAck("join", { code, token })
+          .then((reply) => (reply.ok ? (rejoined += 1) : undefined))
+          .catch(() => undefined);
+      });
       phones.push(phone);
       sockets.push(phone);
       phone
         .timeout(30_000)
         .emitWithAck("join", { code, token: null })
-        .then((reply) => (reply.ok ? joinTimes.push(now() - started) : (refused += 1)))
+        .then((reply) => {
+          if (!reply.ok) return void (refused += 1);
+          token = reply.token;
+          joinTimes.push(now() - started);
+        })
         .catch(() => (refused += 1));
       await sleep(1000 / rate);
     }
@@ -226,6 +242,7 @@ async function main(): Promise<void> {
 
     /** A few phones ask, the presenter shows each question, and the room upvotes. */
     async function questions(slide: Slide): Promise<void> {
+      phase = "qna";
       const go = await assertHost.emitWithAck("go", { index: slides.indexOf(slide) });
       if (!go.ok) throw new Error(`moving to the questions failed: ${go.error}`);
       await sleep(1_500);
@@ -240,6 +257,8 @@ async function main(): Promise<void> {
       );
       for (const questionId of asked) await assertHost.emitWithAck("moderate", { questionId, status: "live" });
       let upvotes = 0;
+      /** Why upvotes were refused: "invalid" is a phone upvoting its own question, which the server does not allow. */
+      const refusals = new Map<string, number>();
       await Promise.all(
         phones.map(async (phone) => {
           await sleep(Math.random() * spread);
@@ -247,11 +266,17 @@ async function main(): Promise<void> {
           if (!questionId) return;
           const reply = await phone.timeout(15_000).emitWithAck("upvote", { questionId, on: true }).catch(() => null);
           if (reply?.ok) upvotes += 1;
+          else {
+            const why = reply ? reply.error : "no reply";
+            refusals.set(why, (refusals.get(why) ?? 0) + 1);
+          }
         }),
       );
-      console.log(`qna       asked ${asked.length} of ${askers.length}, upvotes accepted ${upvotes} of ${phones.length}.`);
+      const refused = [...refusals].map(([why, n]) => `${n} ${why}`).join(", ");
+      console.log(`qna       asked ${asked.length} of ${askers.length}, upvotes accepted ${upvotes} of ${phones.length}${refused ? ` (refused: ${refused})` : ""}.`);
     }
     async function round(slide: Slide, answer: (i: number) => Answer, before?: () => Promise<void>): Promise<void> {
+      phase = slide.type;
       const go = await assertHost.emitWithAck("go", { index: slides.indexOf(slide) });
       if (!go.ok) throw new Error(`moving to ${slide.type} failed: ${go.error}`);
       await sleep(1_500);
@@ -316,8 +341,14 @@ async function main(): Promise<void> {
     }
 
     console.log(`Holding the room for ${hold} s.`);
+    phase = "holding";
     await sleep(hold * 1000);
-    console.log(`Dropped connections during the test: ${dropped}.`);
+    const why = new Map<string, number>();
+    for (const drop of drops) why.set(`${drop.reason} while ${drop.phase}`, (why.get(`${drop.reason} while ${drop.phase}`) ?? 0) + 1);
+    console.log(
+      `Dropped connections during the test: ${drops.length}` +
+        (drops.length ? ` (${[...why].map(([what, n]) => `${n} ${what}`).join("; ")}), rejoined ${rejoined}.` : "."),
+    );
 
     if (keep) {
       console.log(`Kept: session ${sessionId}, code ${code}, presentation ${presentationId}.`);
