@@ -131,7 +131,8 @@
 
   function respond(answer: Answer): Promise<boolean> {
     return new Promise((resolve) => {
-      if (!socket || !slide) return resolve(false);
+      // Buttons stay enabled while an answer is in flight, so keyboard and screen-reader focus stays put; a second tap waits.
+      if (!socket || !slide || busy) return resolve(false);
       busy = true;
       notice = "";
       const slideId = slide.id;
@@ -159,7 +160,7 @@
 
   async function ask(event: SubmitEvent) {
     event.preventDefault();
-    if (!socket || !slide || slide.type !== "qna" || question.trim().length < 2) return;
+    if (!socket || !slide || slide.type !== "qna" || question.trim().length < 2 || busy) return;
     busy = true;
     notice = "";
     const slideId = slide.id;
@@ -287,7 +288,7 @@
                     class="option"
                     class:on
                     aria-pressed={on}
-                    disabled={busy || view.state.locked}
+                    disabled={view.state.locked}
                     style={`--c:var(--t-c${i % 6})`}
                     onclick={() => {
                       if (slide.type !== "poll") return;
@@ -330,7 +331,7 @@
                     class="step"
                     class:on={chosen === value}
                     aria-pressed={chosen === value}
-                    disabled={busy || view.state.locked}
+                    disabled={view.state.locked}
                     onclick={() => respond({ type: "scale", value })}
                   >
                     {value}
@@ -395,7 +396,7 @@
                       class="tile"
                       class:picked={picked === option.id}
                       class:faded={picked !== null && picked !== option.id}
-                      disabled={busy || picked !== null || remaining === 0}
+                      disabled={picked !== null || remaining === 0}
                       style={`--c:var(--t-c${i})`}
                       onclick={() => respond({ type: "quiz", optionId: option.id })}
                     >

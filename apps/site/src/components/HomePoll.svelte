@@ -64,7 +64,7 @@
   const colours = ["#e96626", "#0eaa9d", "#8f80f2", "#ba8c00"];
 </script>
 
-<div class="poll" aria-live="polite">
+<div class="poll">
   <div class="top">
     <span class="live"><span class="dot" aria-hidden="true"></span>Live poll</span>
     {#if poll}<span class="count">{poll.total.toLocaleString("en-KE")} {poll.total === 1 ? "vote" : "votes"} so far</span>{/if}
@@ -85,7 +85,6 @@
             type="button"
             class:mine={mine === option.id}
             aria-pressed={mine === option.id}
-            disabled={sending}
             style={`--share:${(poll.counts[option.id] ?? 0) / most};--any:${poll.counts[option.id] ? 1 : 0};--c:${colours[i % colours.length]}`}
             onclick={() => vote(option.id)}
           >
@@ -97,7 +96,7 @@
       {/each}
     </ul>
     <!-- Both lines share one cell, so the box is as tall as the longer one and nothing below it moves after a vote. -->
-    <p class="note">
+    <p class="note" aria-live="polite">
       <span class:shown={!mine}>Tap an answer. You'll see it land, along with everyone else's.</span>
       <span class:shown={Boolean(mine)}>Your vote is in, and you are watching everyone else's arrive. Tap another answer to change it.</span>
     </p>
